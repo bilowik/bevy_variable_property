@@ -35,17 +35,9 @@ macro_rules! variable_property_impls {
 
     ($self:ident) => {
         variable_property_impls!(
-            [T, T, T, T, T, T, T,], 
-            [U, U, U, U, U, U, U,],
-            [
-                6,
-                5,
-                4,
-                3,
-                2,
-                1,
-                0,
-            ]
+            [T,  T,  T,  T,  T,  T,  T, T, T, T, T, T, T, T, T, T,], 
+            [U,  U,  U,  U,  U,  U,  U, U, U, U, U, U, U, U, U, U,],
+            [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0,]
         );
     };
     (
