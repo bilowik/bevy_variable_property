@@ -1,3 +1,16 @@
+//! A utility field that can produce a static or random value based on specified parameters that
+//! can be utilized in bevy components.
+//!
+//!
+//!
+//!
+//!
+//!
+//!
+//!
+
+
+
 use bevy::prelude::*;
 
 use rand::{
@@ -8,7 +21,10 @@ use rand::{
 
 use std::ops::Range;
 
-mod variable_property;
+pub mod variable_property;
+//pub mod from_vec;
+//pub mod prop_range;
+//use prop_range::{PropArray, PropRange};
 
 use variable_property::VariableProperty;
 
@@ -103,10 +119,14 @@ where
     }
 }
 
+
+pub mod prelude {
+    pub use crate::{Property, variable_property::VariableProperty};
+}
+
 #[cfg(test)]
 mod tests {
-    use super::{Property, VariableProperty};
-    use bevy::prelude::*;
+    use super::*;
     #[test]
     fn range_generation() {
         let ranges = (2.5..5.0, -10.0..0.0, 0.0..1.0);
@@ -139,5 +159,18 @@ mod tests {
                 ranges.2.end
             );
         }
+    }
+
+
+    #[test]
+    #[should_panic]
+    fn bad_range() {
+        let p: Property<f32> = (10.0..1.0).into();
+        p.get_value();
+
+    }
+
+    #[test]
+    fn vecs() {
     }
 }
