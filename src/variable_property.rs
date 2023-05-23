@@ -5,25 +5,21 @@ pub trait VariableProperty<T> {
     fn get_value(&self) -> T;
 }
 
-
 impl<T, U: VariableProperty<T>, const N: usize> VariableProperty<[T; N]> for [U; N] {
     fn get_value(&self) -> [T; N] {
         array![i => self[i].get_value(); N]
     }
 }
 
-
-
-
 macro_rules! reverse {
-    () => {}; 
+    () => {};
     ($self:ident, [$($list:literal,)*], $head:literal, $($tail:literal,)*) => {
-       reverse!($self, [$($list,)* $head,], $($tail,)*) 
+       reverse!($self, [$($list,)* $head,], $($tail,)*)
     };
     ($self:ident, [$($list:literal,)+],) => {
         paste! {(
            $(
-               $self.$list.get_value(), 
+               $self.$list.get_value(),
             )+
         )}
     }
@@ -35,7 +31,7 @@ macro_rules! variable_property_impls {
 
     ($self:ident) => {
         variable_property_impls!(
-            [T,  T,  T,  T,  T,  T,  T, T, T, T, T, T, T, T, T, T,], 
+            [T,  T,  T,  T,  T,  T,  T, T, T, T, T, T, T, T, T, T,],
             [U,  U,  U,  U,  U,  U,  U, U, U, U, U, U, U, U, U, U,],
             [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0,]
         );
@@ -53,7 +49,7 @@ macro_rules! variable_property_impls {
     };
 
     (
-        [$head1:ident, $($tail1:ident,)*], 
+        [$head1:ident, $($tail1:ident,)*],
         [$head2:ident, $($tail2:ident,)*],
         [$head3:literal, $($tail3:literal,)*]
     ) => {
@@ -68,6 +64,5 @@ macro_rules! variable_property_impls {
         variable_property_impls!([$($tail1,)*], [$($tail2,)*], [$($tail3,)*]);
     };
 }
-
 
 variable_property_impls!(self);

@@ -1,14 +1,11 @@
-use bevy::prelude::*;
 use array_macro::array;
+use bevy::prelude::*;
 
 use rand::{
-    Rng,
-    RngCore,
-    seq::SliceRandom, 
-    thread_rng,
-    distributions::{Distribution, Standard, uniform::{SampleUniform, SampleRange, UniformFloat, UniformSampler, SampleBorrow}},
+    distributions::{uniform::SampleUniform, Distribution, Standard},
+    seq::SliceRandom,
+    thread_rng, Rng,
 };
-
 
 use std::ops::Range;
 
@@ -16,125 +13,16 @@ mod variable_property;
 
 use variable_property::VariableProperty;
 
-///*#[derive(Reflect, FromReflect, Clone)]
-//pub struct MultiRange<T, const N: usize> {
-//    ranges: [Range<T>; N],
-//}
-//
-//impl<T: PartialOrd + SampleUniform, const N: usize> SampleRange<[T; N]> for MultiRange<T, N> {
-//    fn sample_single<R: RngCore + ?Sized>(self, rng: &mut R) -> [T; N] {
-//        array![i => self.ranges[i].sample_single(rng); N]
-//    }
-//    
-//    fn is_empty(&self) -> bool {
-//        self.ranges.as_slice().into_iter().any(|r| r.is_empty())
-//    }
-//}
-//
-//impl<T: PartialOrd + SampleUniform> From<Range<T>> for MultiRange<T, 1> {
-//    fn from(other: Range<T>) -> Self {
-//        Self {
-//            ranges: [other]
-//        }
-//    }
-//}*/
-//
-///// Wrapper around Range<T> for foreign trait implementations
-//#[derive(Clone, Default, Debug, Reflect, FromReflect)]
-//pub struct PropRange<T>(pub Range<T>);
-//
-///// Wrapper around generic-length array for foreign trait implementations
-//#[derive(Clone, Default, Debug, Reflect, FromReflect)]
-//pub struct PropArray<T, const N: usize>([T; N]);
-//
-///*impl<T, const N: usize> std::ops::Deref for PropArray<T, N> {
-//    type Target = [T; N];
-//
-//    fn deref(&self) -> &Self::Target {
-//        &self.0
-//    }
-//}
-//
-//impl<T, const N: usize> std::ops::DerefMut for PropArray<T, N> {
-//    fn deref_mut(&mut self) -> &mut Self::Target {
-//        &mut self.0
-//    }
-//}*/
-//
-//
-//impl<T, const N: usize> From<[T; N]> for PropArray<T, N> {
-//    fn from(other: [T; N]) -> Self {
-//        Self(other)
-//    }
-//}
-//
-//impl<T, const N: usize> Into<[T; N]> for PropArray<T, N> {
-//    fn into(self) -> [T; N] {
-//        self.0
-//    }
-//}
-//
-//
-//impl<T> From<Range<T>> for PropRange<T> {
-//    fn from(other: Range<T>) -> Self {
-//        Self(other)
-//    }
-//}
-//
-//
-//impl<T: PartialOrd + SampleUniform + Copy, const N: usize> SampleRange<[T; N]> for PropRange<[T; N]> {
-//    fn sample_single<R: RngCore + ?Sized>(self, rng: &mut R) -> [T; N] {
-//        array![i => (self.0.start[i]..self.0.end[i]).sample_single(rng); N]
-//    }
-//    
-//    fn is_empty(&self) -> bool {
-//        return self.0.start
-//            .as_slice()
-//            .into_iter()
-//            .zip(self.0.end.as_slice().into_iter())
-//            .any(|(s, e)| s >= e);
-//    }
-//}
-//
-//#[derive(Clone, Copy, Debug)]
-//pub struct UniformFloatArray<T, const N: usize>([UniformFloat<T>; N]);
-//
-//impl<const N: usize, T> UniformSampler for UniformFloatArray<T, N> {
-//    type X = [T; N];
-//
-//    fn new<B1, B2>(low: B1, high: B2) -> Self 
-//        where B1: SampleBorrow<Self::X> + Sized, B2: SampleBorrow<Self::X> + Sized {
-//        array![i => UniformFloat::<T>::new(low[i], high[i]); N] 
-//    }
-//    fn new_inclusive<B1, B2>(low: B1, high: B2) -> Self 
-//        where B1: SampleBorrow<Self::X> + Sized, B2: SampleBorrow<Self::X> + Sized {
-//        array![i => UniformFloat::<T>::new_inclusive(low[i], high[i]); N] 
-//    }
-//
-//    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Self::X {
-//        array![i => self.0[i].sample(rng); N]
-//    }
-//}
-//
-//
-//impl<const N: usize> SampleUniform for PropArray<f32, N> {
-//    type Sampler = UniformFloatArray<f32, N>;
-//}
-//
-//impl<const N: usize> SampleUniform for PropArray<f64, N> {
-//    type Sampler = UniformFloatArray<f32, N>;
-//}
-//
-
-
-
 /// Generic property that can be static, randomized within a range, randomly selected from a
 /// predetermined list, or entirely random on each read.
 ///
 /// Implementation of Default provides `Static(T::default())`
 #[derive(Reflect, FromReflect, Clone)]
-pub enum Property<T> 
-where T: Clone + PartialOrd + SampleUniform + Send + Sync + Default + 'static + Reflect + FromReflect, Standard: Distribution<T>  {
+pub enum Property<T>
+where
+    T: Clone + PartialOrd + SampleUniform + Send + Sync + Default + 'static + Reflect + FromReflect,
+    Standard: Distribution<T>,
+{
     /// Produces the same value
     Static(T),
 
@@ -149,7 +37,10 @@ where T: Clone + PartialOrd + SampleUniform + Send + Sync + Default + 'static + 
 }
 
 impl<T> VariableProperty<T> for Property<T>
-where T: Clone + PartialOrd + SampleUniform + Send + Sync + Default + 'static + Reflect + FromReflect, Standard: Distribution<T>  {
+where
+    T: Clone + PartialOrd + SampleUniform + Send + Sync + Default + 'static + Reflect + FromReflect,
+    Standard: Distribution<T>,
+{
     /// Gets a value based on the parameters of the Property
     /// See [Property] for more information.
     fn get_value(&self) -> T {
@@ -162,38 +53,48 @@ where T: Clone + PartialOrd + SampleUniform + Send + Sync + Default + 'static + 
     }
 }
 
-impl<T> From<T> for Property<T> 
-where T: Clone + PartialOrd + SampleUniform + Send + Sync + Default + 'static + Reflect + FromReflect, Standard: Distribution<T>  {
+impl<T> From<T> for Property<T>
+where
+    T: Clone + PartialOrd + SampleUniform + Send + Sync + Default + 'static + Reflect + FromReflect,
+    Standard: Distribution<T>,
+{
     fn from(value: T) -> Self {
         Property::Static(value)
     }
 }
 
-impl<T> From<Range<T>> for Property<T> 
-where T: Clone + PartialOrd + SampleUniform + Send + Sync + Default + 'static + Reflect + FromReflect, Standard: Distribution<T>  {
+impl<T> From<Range<T>> for Property<T>
+where
+    T: Clone + PartialOrd + SampleUniform + Send + Sync + Default + 'static + Reflect + FromReflect,
+    Standard: Distribution<T>,
+{
     fn from(value: Range<T>) -> Self {
         Property::RandomRange(value)
     }
 }
 
-impl<T> From<Vec<T>> for Property<T> 
-where T: Clone + PartialOrd + SampleUniform + Send + Sync + Default + 'static + Reflect + FromReflect, Standard: Distribution<T>  {
+impl<T> From<Vec<T>> for Property<T>
+where
+    T: Clone + PartialOrd + SampleUniform + Send + Sync + Default + 'static + Reflect + FromReflect,
+    Standard: Distribution<T>,
+{
     fn from(value: Vec<T>) -> Self {
         Property::RandomChoice(value)
     }
 }
 
-
 /// Provides `Static(T::default())`
 impl<T> Default for Property<T>
-where T: Clone + PartialOrd + SampleUniform + Send + Sync + Default + 'static + Reflect + FromReflect, Standard: Distribution<T>  {
+where
+    T: Clone + PartialOrd + SampleUniform + Send + Sync + Default + 'static + Reflect + FromReflect,
+    Standard: Distribution<T>,
+{
     fn default() -> Self {
         T::default().into()
     }
 }
 
-
-// The reason Vec2Property and Vec3Property don't utilize VecProperty internally is mainly for 
+// The reason Vec2Property and Vec3Property don't utilize VecProperty internally is mainly for
 // efficiency and ease of access and mutation.
 
 /// A Vec2 where x and y are `Property<f32>`, see [Property] for more information.
@@ -205,10 +106,7 @@ pub struct Vec2Property {
 
 impl Vec2Property {
     pub fn new(x: Property<f32>, y: Property<f32>) -> Self {
-        Self { 
-            x,
-            y,
-        }
+        Self { x, y }
     }
 
     /// Generates a Vec2 from the set properties
@@ -227,11 +125,7 @@ pub struct Vec3Property {
 
 impl Vec3Property {
     pub fn new(x: Property<f32>, y: Property<f32>, z: Property<f32>) -> Self {
-        Self { 
-            x,
-            y,
-            z
-        }
+        Self { x, y, z }
     }
 
     /// Generates a Vec3 from the set properties
@@ -240,44 +134,48 @@ impl Vec3Property {
     }
 }
 
-
 /// A generic Vec-generating struct if Vec2Property and Vec3Property do not fit your needs.
 /// See [Property] for more information.
 ///
 /// For example, if you a field that generates a UVec2, you could utilize this like so:
-/// ```no_run 
+/// ```no_run
 /// struct MyStruct {
 ///     _vec: VecProperty<u32, 2>,
 /// }
-/// 
+///
 /// // Getting the UVec2 is simple since all of the Vec types utilized in Bevy support
 /// // From arrays.
 ///
-/// impl MyStruct { 
+/// impl MyStruct {
 ///     pub fn vec() -> UVec2 {
 ///         self._vec.get().into()
 ///     }
 /// }
 /// ```
 #[derive(Reflect, FromReflect, Clone)]
-pub struct VecProperty<T, const N: usize> 
-where T: Clone + PartialOrd + SampleUniform + Send + Sync + Default + 'static + Reflect + FromReflect, Standard: Distribution<T>  {
+pub struct VecProperty<T, const N: usize>
+where
+    T: Clone + PartialOrd + SampleUniform + Send + Sync + Default + 'static + Reflect + FromReflect,
+    Standard: Distribution<T>,
+{
     pub properties: [Property<T>; N],
 }
 
-impl<const N: usize, T> VecProperty<T, N> 
-where T: Clone + PartialOrd + SampleUniform + Send + Sync + Default + 'static + Reflect + FromReflect, Standard: Distribution<T> {
+impl<const N: usize, T> VecProperty<T, N>
+where
+    T: Clone + PartialOrd + SampleUniform + Send + Sync + Default + 'static + Reflect + FromReflect,
+    Standard: Distribution<T>,
+{
     pub fn new(properties: [Property<T>; N]) -> Self {
         Self { properties }
     }
-    
+
     /// Creates an array of T with size N from the given properties.
     /// Can convert to one of bevy's Vec types if applicable with `into()`
     pub fn get(&self) -> [T; N] {
         array![i => self.properties[i].get_value(); N]
     }
 }
-
 
 /// A Property-like color field that can generate random colors, select one from a set list, or
 /// provide a static one.
@@ -296,10 +194,9 @@ impl ColorGenerator {
             ColorGenerator::Range(v) => v.get().into(),
             ColorGenerator::RandomFromList(colors) => *colors.choose(&mut thread_rng()).unwrap(),
             ColorGenerator::Random => {
-               let mut rng = thread_rng();
-               Color::rgb_u8(rng.gen(), rng.gen(), rng.gen())
-            },
+                let mut rng = thread_rng();
+                Color::rgb_u8(rng.gen(), rng.gen(), rng.gen())
+            }
         }
     }
 }
-
