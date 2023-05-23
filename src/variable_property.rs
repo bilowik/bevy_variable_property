@@ -14,7 +14,7 @@ impl<T, U: VariableProperty<T>, const N: usize> VariableProperty<[T; N]> for [U;
 macro_rules! reverse {
     () => {};
     ($self:ident, [$($list:literal,)*], $head:literal, $($tail:literal,)*) => {
-       reverse!($self, [$($list,)* $head,], $($tail,)*)
+       reverse!($self, [$head, $($list,)*], $($tail,)*)
     };
     ($self:ident, [$($list:literal,)+],) => {
         paste! {(
