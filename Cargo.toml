@@ -10,3 +10,6 @@ rand = "0.8.5"
 bevy = "0.10.1"
 array-macro = "^2.1.5"
 paste = "1.0.12"
+
+[examples]
+color_generator = []
