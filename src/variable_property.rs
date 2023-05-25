@@ -53,7 +53,7 @@ macro_rules! variable_property_impls {
         [$head2:ident, $($tail2:ident,)*],
         [$head3:literal, $($tail3:literal,)*]
     ) => {
-        impl<T, U: VariableProperty<T>> VariableProperty<($head1, $($tail1),*)> for ($head2, $($tail2),*) {
+        impl<T, U: VariableProperty<T>> VariableProperty<($head1, $($tail1,)*)> for ($head2, $($tail2),*) {
             fn get_value(&self) -> ($head1, $($tail1),*) {
                 //($(expr!(self.$tail3.get_value())),*)
                 reverse!(self, [], $head3, $($tail3,)* )

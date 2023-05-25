@@ -1,30 +1,23 @@
 //! A utility field that can produce a static or random value based on specified parameters that
 //! can be utilized in bevy components.
-//!
-//!
-//!
-//!
-//!
-//!
-//!
-//!
-
-
 
 use bevy::prelude::*;
 
 use rand::{
-    distributions::{uniform::SampleUniform, Distribution, Standard},
     seq::SliceRandom,
-    thread_rng, Rng,
+    thread_rng,
 };
 
-use std::ops::Range;
+use std::ops::{Range, RangeInclusive};
 
 pub mod variable_property;
 //pub mod from_vec;
-//pub mod prop_range;
+pub mod prop_range;
+mod prop_rand;
+
 //use prop_range::{PropArray, PropRange};
+use prop_rand::PropRand;
+use prop_range::{PropRange, PropArray};
 
 use variable_property::VariableProperty;
 
@@ -35,14 +28,13 @@ use variable_property::VariableProperty;
 #[derive(Reflect, FromReflect, Clone)]
 pub enum Property<T>
 where
-    T: Clone + PartialOrd + SampleUniform + Send + Sync + Default + 'static + Reflect + FromReflect,
-    Standard: Distribution<T>,
+    T: PropRand + Send + Sync + 'static + Reflect + FromReflect,
 {
     /// Produces the same value
     Static(T),
 
     /// Produces a random value within the given range
-    RandomRange(Range<T>),
+    RandomRange(PropRange<T>),
 
     /// Produces a randomly selected value from the given list
     RandomChoice(Vec<T>),
@@ -53,25 +45,23 @@ where
 
 impl<T> VariableProperty<T> for Property<T>
 where
-    T: Clone + PartialOrd + SampleUniform + Send + Sync + Default + 'static + Reflect + FromReflect,
-    Standard: Distribution<T>,
+    T: PropRand + Clone + Reflect + FromReflect,
 {
     /// Gets a value based on the parameters of the Property
     /// See [Property] for more information.
     fn get_value(&self) -> T {
         match self {
             Property::Static(v) => v.clone(),
-            Property::RandomRange(range) => thread_rng().gen_range(range.clone()),
+            Property::RandomRange(range) => <T as PropRand>::gen_range(&mut thread_rng(), range.clone()),
             Property::RandomChoice(choices) => choices.choose(&mut thread_rng()).unwrap().clone(),
-            Property::Random => thread_rng().gen(),
+            Property::Random => T::gen(&mut thread_rng()),
         }
     }
 }
 
 impl<T> From<T> for Property<T>
 where
-    T: Clone + PartialOrd + SampleUniform + Send + Sync + Default + 'static + Reflect + FromReflect,
-    Standard: Distribution<T>,
+    T: PropRand + Clone + Reflect + FromReflect,
 {
     fn from(value: T) -> Self {
         Property::Static(value)
@@ -80,18 +70,43 @@ where
 
 impl<T> From<Range<T>> for Property<T>
 where
-    T: Clone + PartialOrd + SampleUniform + Send + Sync + Default + 'static + Reflect + FromReflect,
-    Standard: Distribution<T>,
+    T: PropRand + Clone + Reflect + FromReflect,
 {
     fn from(value: Range<T>) -> Self {
-        Property::RandomRange(value)
+        Property::RandomRange(value.into())
+    }
+}
+
+impl<T, const N: usize> From<Range<[T; N]>> for Property<PropArray<T, N>> 
+where
+    T: PropRand + Clone + Reflect + FromReflect,
+{
+    fn from(value: Range<[T; N]>) -> Self {
+        Property::RandomRange(value.into())
+    }
+}
+
+impl<T> From<RangeInclusive<T>> for Property<T>
+where
+    T: PropRand + Clone + Reflect + FromReflect,
+{
+    fn from(value: RangeInclusive<T>) -> Self {
+        Property::RandomRange(value.into())
+    }
+}
+
+impl<T, const N: usize> From<RangeInclusive<[T; N]>> for Property<PropArray<T, N>> 
+where
+    T: PropRand + Clone + Reflect + FromReflect,
+{
+    fn from(value: RangeInclusive<[T; N]>) -> Self {
+        Property::RandomRange(value.into())
     }
 }
 
 impl<T> From<Vec<T>> for Property<T>
 where
-    T: Clone + PartialOrd + SampleUniform + Send + Sync + Default + 'static + Reflect + FromReflect,
-    Standard: Distribution<T>,
+    T: PropRand + Clone + Reflect + FromReflect,
 {
     fn from(value: Vec<T>) -> Self {
         Property::RandomChoice(value)
@@ -100,8 +115,7 @@ where
 
 impl<T, const N: usize> From<[T; N]> for Property<T>
 where
-    T: Clone + PartialOrd + SampleUniform + Send + Sync + Default + 'static + Reflect + FromReflect,
-    Standard: Distribution<T>,
+    T: PropRand + Clone + Reflect + FromReflect,
 {
     fn from(value: [T; N]) -> Self {
         Property::RandomChoice(value.into())
@@ -111,8 +125,7 @@ where
 /// Provides `Static(T::default())`
 impl<T> Default for Property<T>
 where
-    T: Clone + PartialOrd + SampleUniform + Send + Sync + Default + 'static + Reflect + FromReflect,
-    Standard: Distribution<T>,
+    T: PropRand + Clone + Reflect + FromReflect + Default,
 {
     fn default() -> Self {
         T::default().into()
@@ -121,12 +134,13 @@ where
 
 
 pub mod prelude {
-    pub use crate::{Property, variable_property::VariableProperty};
+    pub use crate::{Property, variable_property::VariableProperty, prop_range::{PropArray, PropRange}};
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::prop_range::*;
     #[test]
     fn range_generation() {
         let ranges = (2.5..5.0, -10.0..0.0, 0.0..1.0);
@@ -172,5 +186,10 @@ mod tests {
 
     #[test]
     fn vecs() {
+        let p: Property<PropArray<f32, 2>> = ([0.0, 20.0]..[10.0, 30.0]).into();
+        for _ in 0..10 {
+            println!("{:?}", p.get_value());
+        }
+
     }
 }
