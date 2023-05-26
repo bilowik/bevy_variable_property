@@ -1,5 +1,4 @@
 use array_macro::array;
-use bevy::prelude::*;
 
 use rand::{
     Rng,
@@ -11,9 +10,9 @@ use rand::{
     },
 };
 
-use crate::prop_range::{PropArray, PropRange};
+use crate::prop_range::PropRange;
 
-
+use crate::prop_array::PropArray;
 
 
 pub trait PropRand {

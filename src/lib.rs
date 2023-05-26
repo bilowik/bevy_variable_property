@@ -1,6 +1,12 @@
 //! A utility field that can produce a static or random value based on specified parameters that
 //! can be utilized in bevy components.
 
+pub mod variable_property;
+//pub mod from_vec;
+pub mod prop_range;
+mod prop_rand;
+mod prop_array;
+
 use bevy::prelude::*;
 
 use rand::{
@@ -10,26 +16,18 @@ use rand::{
 
 use std::ops::{Range, RangeInclusive};
 
-pub mod variable_property;
-//pub mod from_vec;
-pub mod prop_range;
-mod prop_rand;
+use crate::prop_rand::PropRand;
+use crate::prop_range::PropRange;
+use crate::prop_array::PropArray;
 
-//use prop_range::{PropArray, PropRange};
-use prop_rand::PropRand;
-use prop_range::{PropRange, PropArray};
-
-use variable_property::VariableProperty;
+use crate::variable_property::VariableProperty;
 
 /// Generic property that can be static, randomized within a range, randomly selected from a
 /// predetermined list, or entirely random on each read.
 ///
 /// Implementation of Default provides `Static(T::default())`
 #[derive(Reflect, FromReflect, Clone)]
-pub enum Property<T>
-where
-    T: PropRand + Send + Sync + 'static + Reflect + FromReflect,
-{
+pub enum Property<T> {
     /// Produces the same value
     Static(T),
 
@@ -43,9 +41,24 @@ where
     Random,
 }
 
+impl<T, const N: usize> Property<PropArray<T, N>> {
+    pub fn from_array_range(start: [T; N], end: [T; N], inclusive: bool) -> Self {
+        Property::RandomRange(PropRange { 
+            start: start.into(), 
+            end: end.into(), 
+            inclusive 
+        })
+    }
+
+    pub fn from_array_choices(choices: Vec<[T; N]>) -> Self {
+        Property::RandomChoice(choices.into_iter().map(|v| PropArray::from(v)).collect())
+    }
+}
+
+
 impl<T> VariableProperty<T> for Property<T>
 where
-    T: PropRand + Clone + Reflect + FromReflect,
+    T: PropRand + Clone 
 {
     /// Gets a value based on the parameters of the Property
     /// See [Property] for more information.
@@ -59,88 +72,67 @@ where
     }
 }
 
-impl<T> From<T> for Property<T>
-where
-    T: PropRand + Clone + Reflect + FromReflect,
-{
-    fn from(value: T) -> Self {
-        Property::Static(value)
-    }
-}
 
-impl<T> From<Range<T>> for Property<T>
-where
-    T: PropRand + Clone + Reflect + FromReflect,
-{
+impl<T> From<Range<T>> for Property<T> {
     fn from(value: Range<T>) -> Self {
         Property::RandomRange(value.into())
     }
 }
 
-impl<T, const N: usize> From<Range<[T; N]>> for Property<PropArray<T, N>> 
-where
-    T: PropRand + Clone + Reflect + FromReflect,
-{
+/*impl<T, const N: usize> From<Range<[T; N]>> for Property<PropArray<T, N>> {
     fn from(value: Range<[T; N]>) -> Self {
         Property::RandomRange(value.into())
     }
-}
+}*/
 
-impl<T> From<RangeInclusive<T>> for Property<T>
-where
-    T: PropRand + Clone + Reflect + FromReflect,
-{
+impl<T> From<RangeInclusive<T>> for Property<T> {
     fn from(value: RangeInclusive<T>) -> Self {
         Property::RandomRange(value.into())
     }
 }
 
-impl<T, const N: usize> From<RangeInclusive<[T; N]>> for Property<PropArray<T, N>> 
+/*impl<T, const N: usize> From<RangeInclusive<[T; N]>> for Property<PropArray<T, N>> 
 where
     T: PropRand + Clone + Reflect + FromReflect,
 {
     fn from(value: RangeInclusive<[T; N]>) -> Self {
         Property::RandomRange(value.into())
     }
-}
+}*/
 
-impl<T> From<Vec<T>> for Property<T>
-where
-    T: PropRand + Clone + Reflect + FromReflect,
-{
+impl<T> From<Vec<T>> for Property<T> {
     fn from(value: Vec<T>) -> Self {
         Property::RandomChoice(value)
     }
 }
 
-impl<T, const N: usize> From<[T; N]> for Property<T>
-where
-    T: PropRand + Clone + Reflect + FromReflect,
-{
+impl<T, const N: usize> From<[T; N]> for Property<T> {
     fn from(value: [T; N]) -> Self {
         Property::RandomChoice(value.into())
     }
 }
 
 /// Provides `Static(T::default())`
-impl<T> Default for Property<T>
-where
-    T: PropRand + Clone + Reflect + FromReflect + Default,
-{
+impl<T: Default> Default for Property<T> {
     fn default() -> Self {
-        T::default().into()
+        Property::Static(T::default())
     }
 }
 
+pub type GenericVecProperty<T, const N: usize> = Property<PropArray<T, N>>;
+pub type VecProperty<const N: usize> = GenericVecProperty<f32, N>;
+pub type Vec2Property = VecProperty<2>;
+pub type Vec3Property = VecProperty<3>;
+pub type Vec4Property = VecProperty<4>;
+
 
 pub mod prelude {
-    pub use crate::{Property, variable_property::VariableProperty, prop_range::{PropArray, PropRange}};
+    pub use crate::{Property, variable_property::VariableProperty, prop_range::PropRange, prop_array::PropArray};
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::prop_range::*;
     #[test]
     fn range_generation() {
         let ranges = (2.5..5.0, -10.0..0.0, 0.0..1.0);
@@ -186,7 +178,7 @@ mod tests {
 
     #[test]
     fn vecs() {
-        let p: Property<PropArray<f32, 2>> = ([0.0, 20.0]..[10.0, 30.0]).into();
+        let p = Property::from_array_range([0.0, 20.0], [10.0, 30.0], true);
         for _ in 0..10 {
             println!("{:?}", p.get_value());
         }
