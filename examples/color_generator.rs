@@ -4,11 +4,14 @@ use bevy::prelude::*;
 use bevy_variable_property::prelude::*;
 
 fn main() {
-    let mut p = Property::RandomRange(([0.0f32, 0.5, 0.0, 1.0]..=[0.5, 1.0, 0.2, 1.0]).into());
+    // We want the range inclusive bc in this made up case we want alpha to always be 1.0.
+    let mut p = Property::from_array_range([0.0f32, 0.5, 0.0, 1.0], [0.5, 1.0, 0.2, 1.0], true);
+    let mut color: Color;
     println!("Generating colors in the (inclusive) range: R: 0.0-0.5, G: 0.5-1.0, B: 0.0-0.2, A: 1.0-1.0");
     println!("===============================");
     for _ in 0..5 {
-        println!("{:?}", Color::from(p.get_value().0));
+        color = p.get_value().into();
+        println!("{:?}", Color::from(p.get_value()));
     }
 
     println!("===============================\n");
@@ -17,7 +20,7 @@ fn main() {
     println!("Printing entirely random colors:");
     println!("===============================");
     for _ in 0..5 {
-        println!("{:?}", Color::from(p.get_value().0));
+        println!("{:?}", Color::from(p.get_value()));
     }
 
     println!("===============================\n");
@@ -38,7 +41,7 @@ fn main() {
     println!("Printing randomly from a preset list of colors:");
     println!("===============================");
     for _ in 0..5 {
-        println!("{:?}", Color::from(p.get_value().0));
+        println!("{:?}", Color::from(p.get_value()));
     }
     println!("===============================");
 }
