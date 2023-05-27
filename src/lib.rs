@@ -42,6 +42,7 @@ pub enum Property<T> {
 }
 
 impl<T, const N: usize> Property<PropArray<T, N>> {
+    /// Convenience method for creating a Property::RandomRange from two arrays.
     pub fn from_array_range(start: [T; N], end: [T; N], inclusive: bool) -> Self {
         Property::RandomRange(PropRange { 
             start: start.into(), 
@@ -50,6 +51,7 @@ impl<T, const N: usize> Property<PropArray<T, N>> {
         })
     }
 
+    /// Convenience method for creating a Property::RandomChoice from a Vec of arrays.
     pub fn from_array_choices(choices: Vec<[T; N]>) -> Self {
         Property::RandomChoice(choices.into_iter().map(|v| PropArray::from(v)).collect())
     }
@@ -79,26 +81,11 @@ impl<T> From<Range<T>> for Property<T> {
     }
 }
 
-/*impl<T, const N: usize> From<Range<[T; N]>> for Property<PropArray<T, N>> {
-    fn from(value: Range<[T; N]>) -> Self {
-        Property::RandomRange(value.into())
-    }
-}*/
-
 impl<T> From<RangeInclusive<T>> for Property<T> {
     fn from(value: RangeInclusive<T>) -> Self {
         Property::RandomRange(value.into())
     }
 }
-
-/*impl<T, const N: usize> From<RangeInclusive<[T; N]>> for Property<PropArray<T, N>> 
-where
-    T: PropRand + Clone + Reflect + FromReflect,
-{
-    fn from(value: RangeInclusive<[T; N]>) -> Self {
-        Property::RandomRange(value.into())
-    }
-}*/
 
 impl<T> From<Vec<T>> for Property<T> {
     fn from(value: Vec<T>) -> Self {
@@ -127,7 +114,8 @@ pub type Vec4Property = VecProperty<4>;
 
 
 pub mod prelude {
-    pub use crate::{Property, variable_property::VariableProperty, prop_range::PropRange, prop_array::PropArray};
+    pub use crate::{Property, variable_property::VariableProperty, prop_range::PropRange, prop_array::PropArray, 
+    GenericVecProperty, VecProperty, Vec2Property, Vec3Property, Vec4Property};
 }
 
 #[cfg(test)]
