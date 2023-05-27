@@ -46,10 +46,10 @@ where T: PropRand + Clone {
 
     fn gen_range<R: RngCore + ?Sized>(rng: &mut R, range: PropRange<PropArray<T, N>>) -> Self {
         if range.inclusive {
-            array![i => T::gen_range(rng, (range.start[i].clone()..=range.end[i].clone()).into()); N].into()
+            array![i => T::gen_range(rng, (range.start.0[i].clone()..=range.end.0[i].clone()).into()); N].into()
         }
         else {
-            array![i => T::gen_range(rng, (range.start[i].clone()..range.end[i].clone()).into()); N].into()
+            array![i => T::gen_range(rng, (range.start.0[i].clone()..range.end.0[i].clone()).into()); N].into()
         }
     }
 }

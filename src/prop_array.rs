@@ -15,21 +15,6 @@ impl<T: Default + Copy, const N: usize> Default for PropArray<T, N> {
     }
 }
 
-impl<T, const N: usize> std::ops::Deref for PropArray<T, N> {
-    type Target = [T; N];
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl<T, const N: usize> std::ops::DerefMut for PropArray<T, N> {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-
-
 impl<T, const N: usize> From<[T; N]> for PropArray<T, N> {
     fn from(other: [T; N]) -> Self {
         Self(other)
@@ -39,6 +24,18 @@ impl<T, const N: usize> From<[T; N]> for PropArray<T, N> {
 impl<T, const N: usize> Into<[T; N]> for PropArray<T, N> {
     fn into(self) -> [T; N] {
         self.0
+    }
+}
+
+impl<T, const N: usize> AsRef<[T]> for PropArray<T, N> {
+    fn as_ref(&self) -> &[T] {
+        &self.0
+    }
+}
+
+impl<T, const N: usize> AsMut<[T]> for PropArray<T, N> {
+    fn as_mut(&mut self) -> &mut [T] {
+        &mut self.0
     }
 }
 
@@ -52,7 +49,6 @@ macro_rules! prop_array_into_impl {
         
     };
 }
-
 
 prop_array_into_impl!(Vec2, f32, 2);
 prop_array_into_impl!(Vec3, f32, 3);
@@ -71,6 +67,5 @@ prop_array_into_impl!(IVec3, i32, 3);
 prop_array_into_impl!(IVec4, i32, 4);
 
 prop_array_into_impl!(Vec3A, f32, 3);
-
 
 prop_array_into_impl!(Color, f32, 4);
