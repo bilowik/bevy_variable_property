@@ -141,30 +141,49 @@ mod tests {
             ranges.1.clone().into(),
             ranges.2.clone().into(),
         );
-        for _ in 0..10 {
-            let v: Vec3 = vec3_generator.get_value().into();
-            assert!(
-                ranges.0.contains(&v.x),
-                "{} was not in the range of ({}..{})",
-                v.x,
-                ranges.0.start,
-                ranges.0.end
-            );
-            assert!(
-                ranges.1.contains(&v.y),
-                "{} was not in the range of ({}..{})",
-                v.y,
-                ranges.1.start,
-                ranges.1.end
-            );
-            assert!(
-                ranges.2.contains(&v.z),
-                "{} was not in the range of ({}..{})",
-                v.z,
-                ranges.2.start,
-                ranges.2.end
-            );
-        }
+        let (x,y,z) = vec3_generator.get_value().into();
+        assert!(
+            ranges.0.contains(&x),
+            "{} was not in the range of ({}..{})",
+            x,
+            ranges.0.start,
+            ranges.0.end
+        );
+        assert!(
+            ranges.1.contains(&y),
+            "{} was not in the range of ({}..{})",
+            y,
+            ranges.1.start,
+            ranges.1.end
+        );
+        assert!(
+            ranges.2.contains(&z),
+            "{} was not in the range of ({}..{})",
+            z,
+            ranges.2.start,
+            ranges.2.end
+        );
+    }
+
+    #[test]
+    fn array_range_generation() {
+        let (start, end) = ([0usize, 25], [10, 50]);
+        let array_prop = Property::from_array_range(start, end, true);
+        let PropArray([x,y]) = array_prop.get_value();
+        assert!(
+            (start[0]..=end[0]).contains(&x),
+            "{} was not in the range of ({}..{})",
+            x,
+            start[0],
+            end[0]
+        );
+        assert!(
+            (start[1]..=end[1]).contains(&y),
+            "{} was not in the range of ({}..{})",
+            y,
+            start[1],
+            end[1]
+        );
     }
 
 
@@ -173,15 +192,5 @@ mod tests {
     fn bad_range() {
         let p: Property<f32> = (10.0..1.0).into();
         p.get_value();
-
-    }
-
-    #[test]
-    fn vecs() {
-        let p = Property::from_array_range([0.0, 20.0], [10.0, 30.0], true);
-        for _ in 0..10 {
-            println!("{:?}", p.get_value());
-        }
-
     }
 }
