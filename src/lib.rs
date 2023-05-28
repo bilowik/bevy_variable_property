@@ -181,4 +181,11 @@ mod tests {
         let p: Property<f32> = (10.0..1.0).into();
         p.get_value();
     }
+
+    #[test]
+    #[should_panic]
+    fn bad_array_range() {
+        let p: Property<PropArray<f32, 2>> = Property::from_array_range([0.0, 10.0], [1.0, 5.0], false);
+        p.get_value();
+    }
 }
