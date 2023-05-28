@@ -2,7 +2,6 @@
 //! can be utilized in bevy components.
 
 pub mod variable_property;
-//pub mod from_vec;
 pub mod prop_range;
 mod prop_rand;
 mod prop_array;
@@ -107,15 +106,33 @@ impl<T: Default> Default for Property<T> {
 }
 
 pub type GenericVecProperty<T, const N: usize> = Property<PropArray<T, N>>;
+
 pub type VecProperty<const N: usize> = GenericVecProperty<f32, N>;
 pub type Vec2Property = VecProperty<2>;
 pub type Vec3Property = VecProperty<3>;
 pub type Vec4Property = VecProperty<4>;
 
+pub type UVecProperty<const N: usize> = GenericVecProperty<u32, N>;
+pub type UVec2Property = UVecProperty<2>;
+pub type UVec3Property = UVecProperty<3>;
+pub type UVec4Property = UVecProperty<4>;
+
+pub type IVecProperty<const N: usize> = GenericVecProperty<i32, N>;
+pub type IVec2Property = IVecProperty<2>;
+pub type IVec3Property = IVecProperty<3>;
+pub type IVec4Property = IVecProperty<4>;
+
+pub type BVecProperty<const N: usize> = GenericVecProperty<bool, N>;
+pub type BVec2Property = BVecProperty<2>;
+pub type BVec3Property = BVecProperty<3>;
+pub type BVec4Property = BVecProperty<4>;
 
 pub mod prelude {
     pub use crate::{Property, variable_property::VariableProperty, prop_range::PropRange, prop_array::PropArray, 
-    GenericVecProperty, VecProperty, Vec2Property, Vec3Property, Vec4Property};
+        GenericVecProperty, VecProperty, Vec2Property, Vec3Property, Vec4Property, UVecProperty, UVec2Property,
+        UVec3Property, UVec4Property, IVecProperty, IVec2Property, IVec3Property, IVec4Property,
+        BVecProperty, BVec2Property, BVec3Property, BVec4Property,
+    };
 }
 
 #[cfg(test)]
