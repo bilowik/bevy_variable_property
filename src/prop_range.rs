@@ -1,8 +1,12 @@
 use bevy::prelude::*;
-
-
+use rand::{
+    RngCore,
+    distributions::uniform::{SampleRange, SampleUniform},
+};
 
 use std::ops::{Range, RangeInclusive};
+
+use crate::prop_rand::PropRand;
 
 /// Wrapper around Range<T> for foreign trait implementations
 #[derive(Clone, Default, Debug, Reflect, FromReflect)]
@@ -45,7 +49,6 @@ impl<T> From<RangeInclusive<T>> for PropRange<T> {
         }
     }
 }
-
 
 
 /*impl<T: PartialOrd + SampleUniform + Copy, const N: usize> SampleRange<[T; N]> for PropRange<[T; N]> {

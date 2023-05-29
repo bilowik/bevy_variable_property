@@ -3,11 +3,6 @@ use array_macro::array;
 use rand::{
     Rng,
     RngCore,
-    distributions::{
-        uniform::SampleUniform,
-        Standard,
-        Distribution,
-    },
 };
 
 use crate::prop_range::PropRange;
@@ -69,49 +64,62 @@ where T: PropRand + Clone {
 }
 
 
-/* Same issue as below, the PartialOrd bound on the above makes this not work unfortunately. 
+macro_rules! prop_rand_tuple_impls_inner {
+    () => {};
+    ($range:ident, $rng:ident, [$($list_idx:literal $list:tt,)*], $head_idx:literal $head:tt, $($tail_idx:literal $tail:tt,)*) => {
+       prop_rand_tuple_impls_inner!($range, $rng, [$head_idx $head, $($list_idx $list,)*], $($tail_idx $tail,)*)
+    };
+    ($range:ident, $rng:ident, [$($idx:literal $list:tt,)+],) => {
+        paste::paste! {(
+            $($list::gen_range($rng, PropRange { start: $range.start.$idx, end: $range.end.$idx, inclusive: $range.inclusive }),)+ 
+        )}
+    }
+}
+
+macro_rules! prop_rand_tuple_impls_inner_2 {
+    () => {};
+    ([$($type_in_list:tt,)*], $head_type:tt, $($tail:tt,)*) => {
+        prop_rand_tuple_impls_inner_2!([$head_type, $($type_in_list,)*], $($tail,)*)
+    };
+    ([$($type_in_list:tt,)+],) => {
+        ($($type_in_list,)+)
+    };
+}
+
+macro_rules! prop_rand_tuple_impls_inner_3 {
+    () => {};
+    ($rng:ident, [$($list_idx:literal $list:tt,)*], $head_idx:literal $head:tt, $($tail_idx:literal $tail:tt,)*) => {
+       prop_rand_tuple_impls_inner_3!($rng, [$head_idx $head, $($list_idx $list,)*], $($tail_idx $tail,)*)
+    };
+    ($rng:ident, [$($idx:literal $list:tt,)+],) => {
+        paste::paste! {(
+            $($list::gen($rng),)+ 
+        )}
+    }
+}
+
+
 macro_rules! prop_rand_tuple_impls {
     () => {};
-    ($head_idx:tt $head:tt, $($idx:tt $tail:tt,)+) => {
-        impl<$head, $($tail,)+> PropRand for ($head, $($tail,)+) 
-            where $head: PropRand + Clone, $($tail: PropRand + Clone),+
+    ($head_idx:literal $head:tt, $($tail_idx:literal $tail:tt,)*) => {
+        impl<$head, $($tail,)*> PropRand for prop_rand_tuple_impls_inner_2!([], $head, $($tail,)*) 
+            where $head: PropRand + Clone, $($tail: PropRand + Clone,)*
         {
             fn gen<R: RngCore + ?Sized>(rng: &mut R) -> Self {
-                ($head::gen(rng), $($tail::gen(rng),)+)
+                prop_rand_tuple_impls_inner_3!(rng, [], $head_idx $head, $($tail_idx $tail,)*)
             }
 
-            fn gen_range<R: RngCore + ?Sized>(rng: &mut R, range: PropRange<($head, $($tail,)+)>) -> Self {
-                ($head::gen_range(rng, range.start.0.clone()..range.end.0.clone()), 
-                 $($tail::gen_range(rng, range.start.$idx.clone()..range.end.$idx.clone()),)+) 
+            fn gen_range<R: RngCore + ?Sized>(rng: &mut R, range: PropRange<prop_rand_tuple_impls_inner_2!([], $head, $($tail,)*)>) -> Self {
+                prop_rand_tuple_impls_inner!(range, rng, [], $head_idx $head, $($tail_idx $tail,)*)
 
             }
         }
 
-        prop_rand_tuple_impls!($($idx $tail),+);
+        prop_rand_tuple_impls!($($tail_idx $tail,)*);
 
     }
 }
 
-prop_rand_tuple_impls!(0 A, 1 B, 2 C, 3 D, 4 E, 5 F, 6 G, 7 H, 8 I, 9 J, 10 K, 11 L, 12 M, 13 N, 14 O, 15 P,);
-*/
+prop_rand_tuple_impls!(15 P, 14 O, 13 N, 12 M, 11 L, 10 K, 9 J, 8 I, 7 H, 6 G, 5 F, 4 E, 3 D, 2 C, 1 B, 0 A,); 
 
-/* Conflicts with the PropRand for T implemention since PartialOrd COULD be implemented on types
-   from bevy.
- 
-macro_rules! prop_rand_vec_impl {
-    ($vec_type:tt, $dim_total:literal, $($dim:ident,)+) => {
-        impl PropRand for $vec_type {
-            fn gen<R: RngCore + ?Sized>(rng: &mut R) -> Self {
-                array![_ => $vec_type::gen(rng); N].into()
-            }
 
-            fn gen_range<R: RngCore + ?Sized>(rng: &mut R, range: PropRange<$vec_type>) -> Self {
-                PropArray<$vec_type, _>::gen_range(rng, PropRange<$vec_type, _>::from([$(range.start.$dim,)+]..[$(range.end.$dim,)+]))
-            }
-        }
-    }
-}
-
-prop_rand_vec_impl!(Vec2, 2, x, y,);
-
-*/

@@ -267,8 +267,9 @@ mod tests {
     }
 
     #[test]
-    fn test() {
-        let p: Property<f32> = 1.0.into();
+    fn tuples() {
+        let p: Property<(f32, f32)> = Property::Static((1.0, 5.0));
+        let v = p.get_value();
         let range: Property<_> = ([0.0, 1.0]..[1.0, 5.0]).into();
 
     }
