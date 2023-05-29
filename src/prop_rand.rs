@@ -1,3 +1,5 @@
+use bevy::prelude::*;
+
 use array_macro::array;
 
 use rand::{
@@ -12,8 +14,7 @@ use crate::prop_range::PropRange;
 pub trait PropRand {
     fn gen<R: RngCore + ?Sized>(rng: &mut R) -> Self;
     fn gen_range<R: RngCore + ?Sized>(rng: &mut R, range: PropRange<Self>) -> Self
-        where Self: Sized;
-}
+        where Self: Sized; }
 
 macro_rules! prop_rand_impl {
     ($type:tt) => {
@@ -122,4 +123,54 @@ macro_rules! prop_rand_tuple_impls {
 
 prop_rand_tuple_impls!(15 P, 14 O, 13 N, 12 M, 11 L, 10 K, 9 J, 8 I, 7 H, 6 G, 5 F, 4 E, 3 D, 2 C, 1 B, 0 A,); 
 
+
+macro_rules! prop_rand_vec_impls_old {
+    () => {};
+    ($head_vec:tt $head_tuple_equivalent:tt, $($tail_vec:tt $tail_tuple_equivalent:tt,)*) => {
+        impl PropRand for $head_vec {
+            fn gen<R: RngCore + ?Sized>(rng: &mut R) -> Self {
+                rng.gen::<$head_tuple_equivalent>().into()
+            }
+
+            fn gen_range<R: RngCore + ?Sized>(rng: &mut R, range: PropRange<Self>) -> Self {
+                <$head_tuple_equivalent>::gen_range(rng, PropRange { start: range.into(), end: range.into(), inclusive: range.inclusive })
+            }
+        }
+
+        prop_rand_vec_impls!($($tail_vec $tail_tuple_equivalent,)*)
+    };
+}
+
+macro_rules! prop_rand_vec_impl {
+    ($vec_type:tt, $inner_type:tt, $($dim_ident:ident,)+) => {
+        impl PropRand for $vec_type {
+            fn gen<R: RngCore + ?Sized>(rng: &mut R) -> Self {
+                $vec_type {
+                    $($dim_ident: rng.gen(),)+
+                }
+            }
+
+            fn gen_range<R: RngCore + ?Sized>(rng: &mut R, range: PropRange<Self>) -> Self {
+                $vec_type {
+                    $($dim_ident: $inner_type::gen_range(rng, PropRange { start: range.start.$dim_ident, end: range.end.$dim_ident, inclusive: range.inclusive }),)+
+                }
+            }
+        }
+    }
+}
+
+
+prop_rand_vec_impl!(Vec2, f32, x, y,);
+prop_rand_vec_impl!(Vec3, f32, x, y, z,);
+prop_rand_vec_impl!(Vec4, f32, x, y, z, w,);
+
+
+/*impl PropRand for Vec2 {
+    fn gen<R: RngCore + ?Sized>(rng: &mut R) -> Self {
+        rng.gen::<(f32, f32)>().into()
+    }
+    fn gen_range<R: RngCore + ?Sized>(rng: &mut R, range: PropRange<Self>) -> Self {
+        <(f32, f32)>::gen_range(rng, PropRange { start: range.start.into(), end: range.end.into(), inclusive: range.inclusive }).into()
+    }
+}*/
 
