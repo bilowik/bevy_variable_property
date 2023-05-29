@@ -4,6 +4,7 @@
 mod prop_rand;
 pub mod prop_range;
 pub mod variable_property;
+pub mod property_component;
 
 use bevy::{
     math::{DVec2, DVec3, DVec4},
@@ -18,6 +19,7 @@ use crate::prop_rand::PropRand;
 use crate::prop_range::PropRange;
 
 use crate::variable_property::VariableProperty;
+
 
 /// Generic property that can be static, randomized within a range, randomly selected from a
 /// predetermined list, or entirely random on each read.
