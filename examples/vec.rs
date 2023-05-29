@@ -3,14 +3,14 @@ use bevy::prelude::*;
 use bevy_variable_property::prelude::*;
 
 fn main() {
-    let p: Vec2Property = ([0.0f32, -100.0]..=[100.0, 0.0]).into();
-    let p2: Vec2Property = (vec![[0.5f32, 5.0], [2.0, 10.0]]).into();
-
+    let p1: Property<_> = Vec2::new(0.0, 1.0).into();
+    let p2: Property<_> = (Vec2::new(0.0, -100.0)..=Vec2::new(100.0, 0.0)).into();
+    let p3: Property<Vec2> = Property::Random;
 
     for _ in 0..10 {
-        let v: Vec2 = p.get_value().into();
-        println!("{:?}", v);
-        let v2: Vec2 = p2.get_value().into();
-        println!("{:?}", v2);
+        for (desc, p) in [("Static", &p1), ("Random range", &p2), ("Entirely random", &p3)] {
+            let v: Vec2 = p.get_value().into();
+            println!("{}: {:?}", desc, v);
+        }
     }
 }

@@ -5,7 +5,10 @@ pub mod variable_property;
 pub mod prop_range;
 mod prop_rand;
 
-use bevy::prelude::*;
+use bevy::{
+    prelude::*,
+    math::{DVec2, DVec3, DVec4},
+};
 
 use rand::{
     seq::SliceRandom,
@@ -62,28 +65,6 @@ impl<T: Default> Default for Property<T> {
         Property::Static(T::default())
     }
 }
-
-pub type GenericVecProperty<T, const N: usize> = Property<[T; N]>;
-
-pub type VecProperty<const N: usize> = GenericVecProperty<f32, N>;
-pub type Vec2Property = VecProperty<2>;
-pub type Vec3Property = VecProperty<3>;
-pub type Vec4Property = VecProperty<4>;
-
-pub type UVecProperty<const N: usize> = GenericVecProperty<u32, N>;
-pub type UVec2Property = UVecProperty<2>;
-pub type UVec3Property = UVecProperty<3>;
-pub type UVec4Property = UVecProperty<4>;
-
-pub type IVecProperty<const N: usize> = GenericVecProperty<i32, N>;
-pub type IVec2Property = IVecProperty<2>;
-pub type IVec3Property = IVecProperty<3>;
-pub type IVec4Property = IVecProperty<4>;
-
-pub type BVecProperty<const N: usize> = GenericVecProperty<bool, N>;
-pub type BVec2Property = BVecProperty<2>;
-pub type BVec3Property = BVecProperty<3>;
-pub type BVec4Property = BVecProperty<4>;
 
 /// Implements a variety of From implementations for the given type.
 ///
@@ -151,7 +132,8 @@ macro_rules! prop_from_impl_many {
     }
 }
 
-prop_from_impl_many!(usize, isize, u8, u16, u32, u64, u128, i8, i16, i32, i64, i128, f32, f64,);
+prop_from_impl_many!(usize, isize, u8, u16, u32, u64, u128, i8, i16, i32, i64, i128, f32, f64,
+                     Vec2, Vec3, Vec4, UVec2, UVec3, UVec4, IVec2, IVec3, IVec4, DVec2, DVec3, DVec4,);
 
 impl<T, const N: usize> From<Range<[T; N]>> for Property<[T; N]> {
     fn from(v: Range<[T; N]>) -> Self {
@@ -188,11 +170,7 @@ impl<T, const N: usize, const M: usize> From<[[T; N]; M]> for Property<[T; N]> {
 
 
 pub mod prelude {
-    pub use crate::{Property, variable_property::VariableProperty, prop_range::PropRange, 
-        GenericVecProperty, VecProperty, Vec2Property, Vec3Property, Vec4Property, UVecProperty, UVec2Property,
-        UVec3Property, UVec4Property, IVecProperty, IVec2Property, IVec3Property, IVec4Property,
-        BVecProperty, BVec2Property, BVec3Property, BVec4Property,
-    };
+    pub use crate::{Property, variable_property::VariableProperty, prop_range::PropRange};
 }
 
 #[cfg(test)]
