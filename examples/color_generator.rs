@@ -4,7 +4,6 @@ use bevy::prelude::*;
 use bevy_variable_property::prelude::*;
 
 fn main() {
-    // We want the range inclusive bc in this made up case we want alpha to always be 1.0.
     let properties = [
         (
             "Generating colors in the (inclusive) range: R: 0.0-0.5, G: 0.5-1.0, B: 0.0-0.2, A: 1.0-1.0",
