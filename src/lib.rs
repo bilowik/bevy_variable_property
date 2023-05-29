@@ -4,7 +4,6 @@
 pub mod variable_property;
 pub mod prop_range;
 mod prop_rand;
-mod prop_array;
 
 use bevy::prelude::*;
 
@@ -17,7 +16,6 @@ use std::ops::{Range, RangeInclusive};
 
 use crate::prop_rand::PropRand;
 use crate::prop_range::PropRange;
-use crate::prop_array::PropArray;
 
 use crate::variable_property::VariableProperty;
 
@@ -38,22 +36,6 @@ pub enum Property<T> {
 
     /// Produces a completely random value
     Random,
-}
-
-impl<T, const N: usize> Property<PropArray<T, N>> {
-    /// Convenience method for creating a Property::RandomRange from two arrays.
-    pub fn from_array_range(start: [T; N], end: [T; N], inclusive: bool) -> Self {
-        Property::RandomRange(PropRange { 
-            start: start.into(), 
-            end: end.into(), 
-            inclusive 
-        })
-    }
-
-    /// Convenience method for creating a Property::RandomChoice from a Vec of arrays.
-    pub fn from_array_choices(choices: Vec<[T; N]>) -> Self {
-        Property::RandomChoice(choices.into_iter().map(|v| PropArray::from(v)).collect())
-    }
 }
 
 
@@ -81,7 +63,7 @@ impl<T: Default> Default for Property<T> {
     }
 }
 
-pub type GenericVecProperty<T, const N: usize> = Property<PropArray<T, N>>;
+pub type GenericVecProperty<T, const N: usize> = Property<[T; N]>;
 
 pub type VecProperty<const N: usize> = GenericVecProperty<f32, N>;
 pub type Vec2Property = VecProperty<2>;
@@ -169,36 +151,36 @@ macro_rules! prop_from_impl_many {
     }
 }
 
-prop_from_impl_many!(u8, u16, u32, u64, u128, i8, i16, i32, i64, i128, f32, f64,);
+prop_from_impl_many!(usize, isize, u8, u16, u32, u64, u128, i8, i16, i32, i64, i128, f32, f64,);
 
-impl<T, const N: usize> From<Range<[T; N]>> for Property<PropArray<T, N>> {
+impl<T, const N: usize> From<Range<[T; N]>> for Property<[T; N]> {
     fn from(v: Range<[T; N]>) -> Self {
         Self::RandomRange(PropRange { start: v.start.into(), end: v.end.into(), inclusive: false })
     }
 }
 
-impl<T: Clone, const N: usize> From<RangeInclusive<[T; N]>> for Property<PropArray<T, N>> {
+impl<T: Clone, const N: usize> From<RangeInclusive<[T; N]>> for Property<[T; N]> {
     fn from(v: RangeInclusive<[T; N]>) -> Self {
-        Self::RandomRange(PropRange { start: v.start().clone().into(), end: v.end().clone().into(), inclusive: true })
+        Self::RandomRange(PropRange { start: v.start().clone(), end: v.end().clone(), inclusive: true })
     }
 }
 
 
-impl<T, const N: usize> From<Vec<[T; N]>> for Property<PropArray<T, N>> {
+impl<T, const N: usize> From<Vec<[T; N]>> for Property<[T; N]> {
     fn from(v: Vec<[T; N]>) -> Self {
         Property::RandomChoice(v.into_iter().map(|x| x.into()).collect())
     }
 }
 
-impl<T: Clone, const N: usize> From<&[[T; N]]> for Property<PropArray<T, N>> {
+impl<T: Clone, const N: usize> From<&[[T; N]]> for Property<[T; N]> {
     fn from(v: &[[T; N]]) -> Self {
-        Property::RandomChoice(v.into_iter().cloned().map(|x| x.into()).collect())
+        Property::RandomChoice(v.into_iter().cloned().collect())
     }
 }
 
-impl<T, const N: usize, const M: usize> From<[[T; N]; M]> for Property<PropArray<T, N>> {
+impl<T, const N: usize, const M: usize> From<[[T; N]; M]> for Property<[T; N]> {
     fn from(v: [[T; N]; M]) -> Self {
-        Property::RandomChoice(v.into_iter().map(|x| x.into()).collect())
+        Property::RandomChoice(v.into_iter().collect())
     }
 }
 
@@ -206,7 +188,7 @@ impl<T, const N: usize, const M: usize> From<[[T; N]; M]> for Property<PropArray
 
 
 pub mod prelude {
-    pub use crate::{Property, variable_property::VariableProperty, prop_range::PropRange, prop_array::PropArray, 
+    pub use crate::{Property, variable_property::VariableProperty, prop_range::PropRange, 
         GenericVecProperty, VecProperty, Vec2Property, Vec3Property, Vec4Property, UVecProperty, UVec2Property,
         UVec3Property, UVec4Property, IVecProperty, IVec2Property, IVec3Property, IVec4Property,
         BVecProperty, BVec2Property, BVec3Property, BVec4Property,
@@ -251,8 +233,8 @@ mod tests {
     #[test]
     fn array_range_generation() {
         let (start, end) = ([0usize, 25], [10, 50]);
-        let array_prop = Property::from_array_range(start, end, true);
-        let PropArray([x,y]) = array_prop.get_value();
+        let array_prop: Property<[usize; 2]> = (start..=end).into();
+        let [x, y] = array_prop.get_value();
         assert!(
             (start[0]..=end[0]).contains(&x),
             "{} was not in the range of ({}..{})",
@@ -273,14 +255,14 @@ mod tests {
     #[test]
     #[should_panic]
     fn bad_range() {
-        let p: Property<f32> = (10.0..1.0).into();
+        let p = Property::from(10.0..1.0);
         p.get_value();
     }
 
     #[test]
     #[should_panic]
     fn bad_array_range() {
-        let p: Property<PropArray<f32, 2>> = Property::from_array_range([0.0, 10.0], [1.0, 5.0], false);
+        let p = Property::from([0.0, 10.0]..[1.0, 5.0]);
         p.get_value();
     }
 

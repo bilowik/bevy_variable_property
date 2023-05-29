@@ -3,9 +3,8 @@ use bevy::prelude::*;
 use bevy_variable_property::prelude::*;
 
 fn main() {
-    // The third argument 'true' describes the range as inclusive (vs false for exclusive).
-    let p: Vec2Property = Property::from_array_range([0.0f32, -100.0], [100.0, 0.0], true);
-    let p2: Vec2Property = Property::from_array_choices(vec![[0.5f32, 5.0], [2.0, 10.0]]);
+    let p: Vec2Property = ([0.0f32, -100.0]..=[100.0, 0.0]).into();
+    let p2: Vec2Property = (vec![[0.5f32, 5.0], [2.0, 10.0]]).into();
 
 
     for _ in 0..10 {

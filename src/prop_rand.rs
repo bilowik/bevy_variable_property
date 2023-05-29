@@ -12,7 +12,6 @@ use rand::{
 
 use crate::prop_range::PropRange;
 
-use crate::prop_array::PropArray;
 
 
 pub trait PropRand {
@@ -21,35 +20,50 @@ pub trait PropRand {
         where Self: Sized;
 }
 
-impl<T> PropRand for T 
-where T: PartialOrd + SampleUniform, Standard: Distribution<T> {
-    fn gen<R: RngCore + ?Sized>(rng: &mut R) -> Self {
-        rng.gen()
-    }
+macro_rules! prop_rand_impl {
+    ($type:tt) => {
+        impl PropRand for $type  {
+            fn gen<R: RngCore + ?Sized>(rng: &mut R) -> Self {
+                rng.gen()
+            }
 
-    fn gen_range<R: RngCore + ?Sized>(rng: &mut R, range: PropRange<T>) -> Self {
-        if range.inclusive {
-            rng.gen_range(range.start..=range.end)
+            fn gen_range<R: RngCore + ?Sized>(rng: &mut R, range: PropRange<$type>) -> Self {
+                if range.inclusive {
+                    rng.gen_range(range.start..=range.end)
+                }
+                else {
+                    rng.gen_range(range.start..range.end)
+                }
+            }
         }
-        else {
-            rng.gen_range(range.start..range.end)
-        }
-
-    }
+        
+    };
 }
 
-impl<T, const N: usize> PropRand for PropArray<T, N> 
+macro_rules! prop_rand_impl_many {
+    ($($type:tt,)+) => {
+        $(
+            prop_rand_impl!($type);
+        )+
+    };
+}
+
+prop_rand_impl_many!(usize, isize, u8, u16, u32, u64, u128, i8, i16, i32, i64, i128, f32, f64,);
+
+
+
+impl<T, const N: usize> PropRand for [T; N] 
 where T: PropRand + Clone {
     fn gen<R: RngCore + ?Sized>(rng: &mut R) -> Self {
-        array![_ => T::gen(rng); N].into()
+        array![_ => T::gen(rng); N]
     }
 
-    fn gen_range<R: RngCore + ?Sized>(rng: &mut R, range: PropRange<PropArray<T, N>>) -> Self {
+    fn gen_range<R: RngCore + ?Sized>(rng: &mut R, range: PropRange<[T; N]>) -> Self {
         if range.inclusive {
-            array![i => T::gen_range(rng, (range.start.0[i].clone()..=range.end.0[i].clone()).into()); N].into()
+            array![i => T::gen_range(rng, (range.start[i].clone()..=range.end[i].clone()).into()); N].into()
         }
         else {
-            array![i => T::gen_range(rng, (range.start.0[i].clone()..range.end.0[i].clone()).into()); N].into()
+            array![i => T::gen_range(rng, (range.start[i].clone()..range.end[i].clone()).into()); N].into()
         }
     }
 }

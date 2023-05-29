@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use crate::prop_array::*;
 
 
 
@@ -36,16 +35,6 @@ impl<T> From<Range<T>> for PropRange<T> {
 }
 
 
-impl<T, const N: usize> From<Range<[T; N]>> for PropRange<PropArray<T, N>> {
-    fn from(v: Range<[T; N]>) -> Self {
-        Self {
-            start: v.start.into(),
-            end: v.end.into(),
-            inclusive: false,
-        }
-    }
-}
-
 impl<T> From<RangeInclusive<T>> for PropRange<T> {
     fn from(v: RangeInclusive<T>) -> Self {
         let (start, end) = v.into_inner();
@@ -57,17 +46,6 @@ impl<T> From<RangeInclusive<T>> for PropRange<T> {
     }
 }
 
-
-impl<T, const N: usize> From<RangeInclusive<[T; N]>> for PropRange<PropArray<T, N>> {
-    fn from(v: RangeInclusive<[T; N]>) -> Self {
-        let (start, end) = v.into_inner();
-        Self {
-            start: start.into(),
-            end: end.into(),
-            inclusive: true,
-        }
-    }
-}
 
 
 /*impl<T: PartialOrd + SampleUniform + Copy, const N: usize> SampleRange<[T; N]> for PropRange<[T; N]> {

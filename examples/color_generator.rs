@@ -16,18 +16,13 @@ fn main() {
         ),
         (
             "Generating colors based on a predefined list",
-            Property::RandomChoice(
                 vec![
                     [0.0, 0.5, 1.0, 1.0],
                     [0.3, 0.9, 0.5, 1.0],
                     [0.5, 0.3, 0.3, 1.0],
                     [0.8, 0.2, 0.9, 1.0],
                     [1.0, 1.0, 0.9, 0.8],
-                ]
-                .into_iter()
-                .map(|e| e.into())
-                .collect()
-            ),
+                ].into()
         )
     ];
 
