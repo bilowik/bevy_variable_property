@@ -74,30 +74,6 @@ where
 }
 
 
-impl<T> From<Range<T>> for Property<T> {
-    fn from(value: Range<T>) -> Self {
-        Property::RandomRange(value.into())
-    }
-}
-
-impl<T> From<RangeInclusive<T>> for Property<T> {
-    fn from(value: RangeInclusive<T>) -> Self {
-        Property::RandomRange(value.into())
-    }
-}
-
-impl<T> From<Vec<T>> for Property<T> {
-    fn from(value: Vec<T>) -> Self {
-        Property::RandomChoice(value)
-    }
-}
-
-impl<T, const N: usize> From<[T; N]> for Property<T> {
-    fn from(value: [T; N]) -> Self {
-        Property::RandomChoice(value.into())
-    }
-}
-
 /// Provides `Static(T::default())`
 impl<T: Default> Default for Property<T> {
     fn default() -> Self {
@@ -126,6 +102,108 @@ pub type BVecProperty<const N: usize> = GenericVecProperty<bool, N>;
 pub type BVec2Property = BVecProperty<2>;
 pub type BVec3Property = BVecProperty<3>;
 pub type BVec4Property = BVecProperty<4>;
+
+/// Implements a variety of From implementations for the given type.
+///
+/// From<$type> -> Static, From<Range<$type>> -> RandomRange, From<RangeInclusve<$type>> -> RandomRange, 
+/// From<Vec<$type>> -> RandomChoice, and From<&[$type]> -> RandomChoice,
+///
+/// The $from_type **must** implement Clone.
+///
+/// If two types are provided, $from_type must implement Into for $into_prop_type
+macro_rules! prop_from_impl {
+    ($from_type:tt) => {
+        prop_from_impl!($from_type, $from_type);
+    };
+
+    ($from_type:tt, $into_prop_type:tt) => {
+        impl From<$from_type> for Property<$into_prop_type> {
+            fn from(v: $from_type) -> Self {
+                Property::Static(v.into())
+            }
+        }
+        
+        impl From<Range<$from_type>> for Property<$into_prop_type> {
+            fn from(v: Range<$from_type>) -> Self {
+                Property::RandomRange(PropRange { start: v.start.into(), end: v.end.into(), inclusive: false })
+            }
+        }
+
+        impl From<RangeInclusive<$from_type>> for Property<$into_prop_type> {
+            fn from(v: RangeInclusive<$from_type>) -> Self {
+                Property::RandomRange(PropRange { start: v.start().clone().into(), end: v.end().clone().into(), inclusive: true })
+            }
+        }
+
+        impl From<Vec<$from_type>> for Property<$into_prop_type> {
+            fn from(v: Vec<$from_type>) -> Self {
+                Property::RandomChoice(v.into_iter().map(|x| x.into()).collect())
+            }
+        }
+
+        impl From<&[$from_type]> for Property<$into_prop_type> {
+            fn from(v: &[$from_type]) -> Self {
+                Property::RandomChoice(v.into_iter().cloned().map(|x| x.into()).collect())
+            }
+        }
+
+        impl<const N: usize> From<[$from_type; N]> for Property<$into_prop_type> {
+            fn from(v: [$from_type; N]) -> Self {
+                Property::RandomChoice(v.into())
+            }
+        }
+    };
+}
+
+/// Implements a variety of From implementations for the given type.
+///
+/// From<$type> -> Static, From<Range<$type>> -> RandomRange, From<RangeInclusve<$type>> -> RandomRange, 
+/// From<Vec<$type>> -> RandomChoice, and From<&[$type]> -> RandomChoice,
+///
+/// The given type **must** implement Clone.
+macro_rules! prop_from_impl_many {
+    ($($type:tt,)+) => {
+        $(
+            prop_from_impl!($type, $type);
+        )+
+    }
+}
+
+prop_from_impl_many!(u8, u16, u32, u64, u128, i8, i16, i32, i64, i128, f32, f64,);
+
+impl<T, const N: usize> From<Range<[T; N]>> for Property<PropArray<T, N>> {
+    fn from(v: Range<[T; N]>) -> Self {
+        Self::RandomRange(PropRange { start: v.start.into(), end: v.end.into(), inclusive: false })
+    }
+}
+
+impl<T: Clone, const N: usize> From<RangeInclusive<[T; N]>> for Property<PropArray<T, N>> {
+    fn from(v: RangeInclusive<[T; N]>) -> Self {
+        Self::RandomRange(PropRange { start: v.start().clone().into(), end: v.end().clone().into(), inclusive: true })
+    }
+}
+
+
+impl<T, const N: usize> From<Vec<[T; N]>> for Property<PropArray<T, N>> {
+    fn from(v: Vec<[T; N]>) -> Self {
+        Property::RandomChoice(v.into_iter().map(|x| x.into()).collect())
+    }
+}
+
+impl<T: Clone, const N: usize> From<&[[T; N]]> for Property<PropArray<T, N>> {
+    fn from(v: &[[T; N]]) -> Self {
+        Property::RandomChoice(v.into_iter().cloned().map(|x| x.into()).collect())
+    }
+}
+
+impl<T, const N: usize, const M: usize> From<[[T; N]; M]> for Property<PropArray<T, N>> {
+    fn from(v: [[T; N]; M]) -> Self {
+        Property::RandomChoice(v.into_iter().map(|x| x.into()).collect())
+    }
+}
+
+
+
 
 pub mod prelude {
     pub use crate::{Property, variable_property::VariableProperty, prop_range::PropRange, prop_array::PropArray, 
@@ -204,5 +282,12 @@ mod tests {
     fn bad_array_range() {
         let p: Property<PropArray<f32, 2>> = Property::from_array_range([0.0, 10.0], [1.0, 5.0], false);
         p.get_value();
+    }
+
+    #[test]
+    fn test() {
+        let p: Property<f32> = 1.0.into();
+        let range: Property<_> = ([0.0, 1.0]..[1.0, 5.0]).into();
+
     }
 }

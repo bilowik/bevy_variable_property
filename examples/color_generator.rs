@@ -8,7 +8,7 @@ fn main() {
     let properties = [
         (
             "Generating colors in the (inclusive) range: R: 0.0-0.5, G: 0.5-1.0, B: 0.0-0.2, A: 1.0-1.0",
-            Property::from_array_range([0.0f32, 0.5, 0.0, 1.0], [0.5, 1.0, 0.2, 1.0], true),
+            ([0.0f32, 0.5, 0.0, 1.0]..=[0.5, 1.0, 0.2, 1.0]).into()
         ),
         (
             "Generating entirely random colors",
