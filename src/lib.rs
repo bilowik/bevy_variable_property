@@ -1,19 +1,16 @@
 //! A utility field that can produce a static or random value based on specified parameters that
 //! can be utilized in bevy components.
 
-pub mod variable_property;
-pub mod prop_range;
 mod prop_rand;
+pub mod prop_range;
+pub mod variable_property;
 
 use bevy::{
-    prelude::*,
     math::{DVec2, DVec3, DVec4},
+    prelude::*,
 };
 
-use rand::{
-    seq::SliceRandom,
-    thread_rng,
-};
+use rand::{seq::SliceRandom, thread_rng};
 
 use std::ops::{Range, RangeInclusive};
 
@@ -41,23 +38,23 @@ pub enum Property<T> {
     Random,
 }
 
-
 impl<T> VariableProperty<T> for Property<T>
 where
-    T: PropRand + Clone 
+    T: PropRand + Clone,
 {
     /// Gets a value based on the parameters of the Property
     /// See [Property] for more information.
     fn get_value(&self) -> T {
         match self {
             Property::Static(v) => v.clone(),
-            Property::RandomRange(range) => <T as PropRand>::gen_range(&mut thread_rng(), range.clone()),
+            Property::RandomRange(range) => {
+                <T as PropRand>::gen_range(&mut thread_rng(), range.clone())
+            }
             Property::RandomChoice(choices) => choices.choose(&mut thread_rng()).unwrap().clone(),
             Property::Random => T::gen(&mut thread_rng()),
         }
     }
 }
-
 
 /// Provides `Static(T::default())`
 impl<T: Default> Default for Property<T> {
@@ -68,7 +65,7 @@ impl<T: Default> Default for Property<T> {
 
 /// Implements a variety of From implementations for the given type.
 ///
-/// From<$type> -> Static, From<Range<$type>> -> RandomRange, From<RangeInclusve<$type>> -> RandomRange, 
+/// From<$type> -> Static, From<Range<$type>> -> RandomRange, From<RangeInclusve<$type>> -> RandomRange,
 /// From<Vec<$type>> -> RandomChoice, and From<&[$type]> -> RandomChoice,
 ///
 /// The $from_type **must** implement Clone.
@@ -85,16 +82,24 @@ macro_rules! prop_from_impl {
                 Property::Static(v.into())
             }
         }
-        
+
         impl From<Range<$from_type>> for Property<$into_prop_type> {
             fn from(v: Range<$from_type>) -> Self {
-                Property::RandomRange(PropRange { start: v.start.into(), end: v.end.into(), inclusive: false })
+                Property::RandomRange(PropRange {
+                    start: v.start.into(),
+                    end: v.end.into(),
+                    inclusive: false,
+                })
             }
         }
 
         impl From<RangeInclusive<$from_type>> for Property<$into_prop_type> {
             fn from(v: RangeInclusive<$from_type>) -> Self {
-                Property::RandomRange(PropRange { start: v.start().clone().into(), end: v.end().clone().into(), inclusive: true })
+                Property::RandomRange(PropRange {
+                    start: v.start().clone().into(),
+                    end: v.end().clone().into(),
+                    inclusive: true,
+                })
             }
         }
 
@@ -120,7 +125,7 @@ macro_rules! prop_from_impl {
 
 /// Implements a variety of From implementations for the given type.
 ///
-/// From<$type> -> Static, From<Range<$type>> -> RandomRange, From<RangeInclusve<$type>> -> RandomRange, 
+/// From<$type> -> Static, From<Range<$type>> -> RandomRange, From<RangeInclusve<$type>> -> RandomRange,
 /// From<Vec<$type>> -> RandomChoice, and From<&[$type]> -> RandomChoice,
 ///
 /// The given type **must** implement Clone.
@@ -132,21 +137,30 @@ macro_rules! prop_from_impl_many {
     }
 }
 
-prop_from_impl_many!(usize, isize, u8, u16, u32, u64, u128, i8, i16, i32, i64, i128, f32, f64,
-                     Vec2, Vec3, Vec4, UVec2, UVec3, UVec4, IVec2, IVec3, IVec4, DVec2, DVec3, DVec4,);
+prop_from_impl_many!(
+    usize, isize, u8, u16, u32, u64, u128, i8, i16, i32, i64, i128, f32, f64, Vec2, Vec3, Vec4,
+    UVec2, UVec3, UVec4, IVec2, IVec3, IVec4, DVec2, DVec3, DVec4,
+);
 
 impl<T, const N: usize> From<Range<[T; N]>> for Property<[T; N]> {
     fn from(v: Range<[T; N]>) -> Self {
-        Self::RandomRange(PropRange { start: v.start.into(), end: v.end.into(), inclusive: false })
+        Self::RandomRange(PropRange {
+            start: v.start.into(),
+            end: v.end.into(),
+            inclusive: false,
+        })
     }
 }
 
 impl<T: Clone, const N: usize> From<RangeInclusive<[T; N]>> for Property<[T; N]> {
     fn from(v: RangeInclusive<[T; N]>) -> Self {
-        Self::RandomRange(PropRange { start: v.start().clone(), end: v.end().clone(), inclusive: true })
+        Self::RandomRange(PropRange {
+            start: v.start().clone(),
+            end: v.end().clone(),
+            inclusive: true,
+        })
     }
 }
-
 
 impl<T, const N: usize> From<Vec<[T; N]>> for Property<[T; N]> {
     fn from(v: Vec<[T; N]>) -> Self {
@@ -166,11 +180,8 @@ impl<T, const N: usize, const M: usize> From<[[T; N]; M]> for Property<[T; N]> {
     }
 }
 
-
-
-
 pub mod prelude {
-    pub use crate::{Property, variable_property::VariableProperty, prop_range::PropRange};
+    pub use crate::{prop_range::PropRange, variable_property::VariableProperty, Property};
 }
 
 #[cfg(test)]
@@ -184,7 +195,7 @@ mod tests {
             ranges.1.clone().into(),
             ranges.2.clone().into(),
         );
-        let (x,y,z) = vec3_generator.get_value().into();
+        let (x, y, z) = vec3_generator.get_value().into();
         assert!(
             ranges.0.contains(&x),
             "{} was not in the range of ({}..{})",
@@ -228,7 +239,6 @@ mod tests {
             end[1]
         );
     }
-
 
     #[test]
     #[should_panic]

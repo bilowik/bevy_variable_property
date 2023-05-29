@@ -1,13 +1,8 @@
-use bevy::{
-    prelude::*,
-    math::*,
-};
-
+use bevy::{math::*, prelude::*};
 
 /// Wrapper around generic-length array for foreign trait implementations
 #[derive(Clone, Debug, Reflect, FromReflect)]
 pub struct PropArray<T, const N: usize>(pub [T; N]);
-
 
 impl<T: Default + Copy, const N: usize> Default for PropArray<T, N> {
     fn default() -> Self {
@@ -46,7 +41,6 @@ macro_rules! prop_array_into_impl {
                 self.0.into()
             }
         }
-        
     };
 }
 

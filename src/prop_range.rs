@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use std::ops::{Range, RangeInclusive};
 
-/// Wrapper around Range<T> 
+/// Wrapper around Range<T>
 #[derive(Clone, Default, Debug, Reflect, FromReflect)]
 pub struct PropRange<T> {
     pub start: T,
@@ -20,8 +20,6 @@ impl<T> PropRange<T> {
     }
 }
 
-
-
 impl<T> From<Range<T>> for PropRange<T> {
     fn from(v: Range<T>) -> Self {
         Self {
@@ -32,16 +30,13 @@ impl<T> From<Range<T>> for PropRange<T> {
     }
 }
 
-
 impl<T> From<RangeInclusive<T>> for PropRange<T> {
     fn from(v: RangeInclusive<T>) -> Self {
         let (start, end) = v.into_inner();
         Self {
             start,
-            end, 
+            end,
             inclusive: true,
         }
     }
 }
-
-

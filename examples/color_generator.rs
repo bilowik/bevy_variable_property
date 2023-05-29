@@ -25,7 +25,7 @@ fn main() {
         )
     ];
 
-    for (description, p) in properties.into_iter() { 
+    for (description, p) in properties.into_iter() {
         println!("{}", description);
         println!("===============================");
         for _ in 0..5 {
@@ -34,5 +34,4 @@ fn main() {
         }
         println!("===============================\n");
     }
-
 }

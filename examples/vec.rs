@@ -8,7 +8,11 @@ fn main() {
     let p3: Property<Vec2> = Property::Random;
 
     for _ in 0..10 {
-        for (desc, p) in [("Static", &p1), ("Random range", &p2), ("Entirely random", &p3)] {
+        for (desc, p) in [
+            ("Static", &p1),
+            ("Random range", &p2),
+            ("Entirely random", &p3),
+        ] {
             let v: Vec2 = p.get_value().into();
             println!("{}: {:?}", desc, v);
         }
