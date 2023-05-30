@@ -4,7 +4,7 @@
 mod prop_rand;
 pub mod prop_range;
 pub mod variable_property;
-pub mod property_component;
+pub mod interval_property;
 
 use bevy::{
     math::{DVec2, DVec3, DVec4},
@@ -184,7 +184,7 @@ impl<T, const N: usize, const M: usize> From<[[T; N]; M]> for Property<[T; N]> {
 }
 
 pub mod prelude {
-    pub use crate::{prop_range::PropRange, variable_property::VariableProperty, Property};
+    pub use crate::{prop_range::PropRange, variable_property::VariableProperty, Property, interval_property::IntervalProperty};
 }
 
 #[cfg(test)]
