@@ -40,10 +40,11 @@ pub enum Property<T> {
     Random,
 }
 
-impl<T> VariableProperty<T> for Property<T>
+impl<T> VariableProperty for Property<T>
 where
     T: PropRand + Clone,
 {
+    type Output = T;
     /// Gets a value based on the parameters of the Property
     /// See [Property] for more information.
     fn get_value(&self) -> T {

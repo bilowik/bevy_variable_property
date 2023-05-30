@@ -10,15 +10,14 @@ use crate::variable_property::VariableProperty;
 ///
 /// Typically, this will be used in conjunction with [
 #[derive(Reflect, FromReflect)]
-pub struct IntervalProperty<U, T: VariableProperty<U>> {
+pub struct IntervalProperty<T> {
     property: T,
     timer: Timer,
-    _phantom: std::marker::PhantomData<U>,
 }
 
-impl<U, T: VariableProperty<U>> IntervalProperty<U, T> {
+impl<T: VariableProperty> IntervalProperty<T> {
     // Will return the new value when the timer has finished.
-    pub(crate) fn tick_value(&mut self, delta: Duration) -> Option<U> {
+    pub(crate) fn tick_value(&mut self, delta: Duration) -> Option<T::Output> {
         self.timer.tick(delta);
         if self.timer.just_finished() {
             Some(self.property.get_value())
@@ -27,40 +26,25 @@ impl<U, T: VariableProperty<U>> IntervalProperty<U, T> {
             None
         }
     }
+    
 }
 
-pub struct IntervalPropertyBuilder<U: Reflect + Default, T: VariableProperty<U> + Reflect + Default> {
-    property: T,
-    secs: f32,
-    _phantom: std::marker::PhantomData<U>,
-}
+impl<T> IntervalProperty<T> {
 
-impl<U: Reflect + Default, T: VariableProperty<U> + Reflect + Default> IntervalPropertyBuilder<U, T> {
-    pub fn with_secs(mut self, secs: f32) -> Self {
-        self.secs = secs;
-        self
-    }
-
-    pub fn with_property(mut self, property: T) -> Self {
-        self.property = property;
-        self
-    }
-
-    pub fn build(self) -> IntervalProperty<U, T> {
-        IntervalProperty {
-            property: self.property,
-            timer: Timer::from_seconds(self.secs, TimerMode::Repeating),
-            _phantom: Default::default(),
+    pub fn new(property: T, interval: f32) -> Self {
+        Self {
+            property,
+            timer: Timer::from_seconds(interval, TimerMode::Repeating),
         }
     }
 }
 
-impl<U: Default + Reflect, T: VariableProperty<U> + Reflect + Default> Default for IntervalProperty<U, T> {
+
+impl<T: Default> Default for IntervalProperty<T> {
     fn default() -> Self {
         Self {
             property: Default::default(),
             timer: Timer::new(bevy::utils::Duration::from_secs_f32(1.0), TimerMode::Repeating),
-            _phantom: Default::default(),
         }
     }
 }
@@ -72,13 +56,13 @@ impl<U: Default + Reflect, T: VariableProperty<U> + Reflect + Default> Default f
 /// AsMut<IntervalProperty> then use this to create the system that will tick that
 /// [InternvalProperty] and update the given component when the [IntervalProperty] generates a new
 /// value.
-pub fn update_interval_property_system_gen<U, T, W, V, F>(updater: impl Fn(U, &mut V)) -> impl Fn(Query<(&mut V, &mut W), F>, Res<Time>)
-    where V: Component, U: Reflect + Default, T: VariableProperty<U> + Reflect + Default, F: ReadOnlyWorldQuery,
-          W: Component + AsMut<IntervalProperty<U, T>> {
+pub fn update_interval_property_system_gen<T, W, V, F>(updater: impl Fn(T::Output, &mut V)) -> impl Fn(Query<(&mut V, &mut W), F>, Res<Time>)
+    where V: Component, T: VariableProperty + Reflect + Default, F: ReadOnlyWorldQuery,
+          W: Component + AsMut<IntervalProperty<T>> {
     move |mut query, time| {
         let delta = time.delta();
        for (mut target, mut source) in query.iter_mut() {
-           if let Some(new_value) = AsMut::<IntervalProperty<U, T>>::as_mut(&mut *source).tick_value(delta) {
+           if let Some(new_value) = AsMut::<IntervalProperty<T>>::as_mut(&mut *source).tick_value(delta) {
                 updater(new_value, target.as_mut()); 
            }
        }
