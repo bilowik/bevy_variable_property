@@ -56,8 +56,8 @@ impl<T: Default> Default for IntervalProperty<T> {
 /// AsMut<IntervalProperty> then use this to create the system that will tick that
 /// [InternvalProperty] and update the given component when the [IntervalProperty] generates a new
 /// value.
-pub fn update_interval_property_system_gen<T, W, V, F>(updater: impl Fn(T::Output, &mut V)) -> impl Fn(Query<(&mut V, &mut W), F>, Res<Time>)
-    where V: Component, T: VariableProperty + Reflect + Default, F: ReadOnlyWorldQuery,
+pub fn update_interval_property_system_gen<T, W, V>(updater: impl Fn(T::Output, &mut V)) -> impl Fn(Query<(&mut V, &mut W)>, Res<Time>)
+    where V: Component, T: VariableProperty + Reflect + Default,
           W: Component + AsMut<IntervalProperty<T>> {
     move |mut query, time| {
         let delta = time.delta();
