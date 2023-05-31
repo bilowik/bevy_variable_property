@@ -49,6 +49,13 @@ impl<T: Default> Default for IntervalProperty<T> {
     }
 }
 
+pub trait IntervalPropertyComponent: AsMut<IntervalProperty<Self::Property>> + Component {
+    type Property: VariableProperty;
+    type TargetComponent: Component;
+
+    fn update(new_value: <Self::Property as VariableProperty>::Output, target: &mut Self::TargetComponent);
+}
+
 /// Creates a system that will tick the IntervalProperty field and update the component with the
 /// given updater method. 
 ///
@@ -56,15 +63,11 @@ impl<T: Default> Default for IntervalProperty<T> {
 /// AsMut<IntervalProperty> then use this to create the system that will tick that
 /// [InternvalProperty] and update the given component when the [IntervalProperty] generates a new
 /// value.
-pub fn update_interval_property_system_gen<T, W, V>(updater: impl Fn(T::Output, &mut V)) -> impl Fn(Query<(&mut V, &mut W)>, Res<Time>)
-    where V: Component, T: VariableProperty + Reflect + Default,
-          W: Component + AsMut<IntervalProperty<T>> {
-    move |mut query, time| {
-        let delta = time.delta();
-       for (mut target, mut source) in query.iter_mut() {
-           if let Some(new_value) = AsMut::<IntervalProperty<T>>::as_mut(&mut *source).tick_value(delta) {
-                updater(new_value, target.as_mut()); 
-           }
+pub fn update_interval_property_system_gen<T: IntervalPropertyComponent>(mut query: Query<(&mut T, &mut T::TargetComponent)>, time: Res<Time>) {
+    let delta = time.delta();
+    for (mut source, mut target) in query.iter_mut() {
+        if let Some(new_value) = AsMut::<IntervalProperty<T::Property>>::as_mut(&mut *source).tick_value(delta) {
+            T::update(new_value, target.as_mut()); 
        }
     }
 }
