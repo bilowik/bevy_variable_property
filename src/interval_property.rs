@@ -48,11 +48,26 @@ impl<T: Default> Default for IntervalProperty<T> {
     }
 }
 
-pub trait IntervalPropertyComponent: AsMut<IntervalProperty<Self::Property>> + Component {
+pub trait IntervalPropertyComponent: AsMut<IntervalProperty<Self::Property>> + Component + Sized {
     type Property: VariableProperty;
     type TargetComponent: Component;
 
     fn update(new_value: <Self::Property as VariableProperty>::Output, target: &mut Self::TargetComponent);
+
+
+    fn system(
+        mut query: Query<(&mut Self, &mut Self::TargetComponent, Option<&PauseIntervalProperty<Self>>)>, 
+        time: Res<Time>,
+    ) {
+        let delta = time.delta();
+        for (mut source, mut target, maybe_pause) in query.iter_mut() {
+            if let Some(new_value) = AsMut::<IntervalProperty<Self::Property>>::as_mut(&mut *source).tick_value(delta) {
+                if maybe_pause.is_none() {
+                    Self::update(new_value, target.as_mut()); 
+                }
+           }
+        }
+    }
 }
 
 #[derive(Component, Reflect, FromReflect)]
@@ -64,25 +79,3 @@ impl<T> Default for PauseIntervalProperty<T> {
         Self(Default::default())
     }
 }
-
-/// Creates a system that will tick the IntervalProperty field and update the component with the
-/// given updater method. 
-///
-/// Typically, you will create a wrapper struct around [IntervalProperty] that implements
-/// AsMut<IntervalProperty> then use this to create the system that will tick that
-/// [InternvalProperty] and update the given component when the [IntervalProperty] generates a new
-/// value.
-pub fn interval_property_tick<T: IntervalPropertyComponent>(
-    mut query: Query<(&mut T, &mut T::TargetComponent, Option<&PauseIntervalProperty<T>>)>, time: Res<Time>
-) {
-    let delta = time.delta();
-    for (mut source, mut target, maybe_pause) in query.iter_mut() {
-        if let Some(new_value) = AsMut::<IntervalProperty<T::Property>>::as_mut(&mut *source).tick_value(delta) {
-            if maybe_pause.is_none() {
-                T::update(new_value, target.as_mut()); 
-            }
-       }
-    }
-}
-
-
