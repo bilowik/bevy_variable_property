@@ -48,6 +48,6 @@ fn setup(
                 material: materials.add(ColorMaterial::from(Color::WHITE)),
                 ..default()
             },
-            MyIntervalProperty(IntervalProperty::new((Vec2::new(-250.0, -250.0)..Vec2::new(250.0, 250.0)).into(), 0.5)),
+            MyIntervalProperty(IntervalProperty::new((Vec2::new(-250.0, -250.0)..=Vec2::new(250.0, 250.0)).into(), 0.5)),
         ));
 }

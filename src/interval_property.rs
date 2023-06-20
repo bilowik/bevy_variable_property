@@ -1,7 +1,6 @@
 use bevy::{
     prelude::*,
     utils::Duration,
-    ecs::query::ReadOnlyWorldQuery,
 };
 
 use crate::variable_property::VariableProperty;
@@ -56,6 +55,16 @@ pub trait IntervalPropertyComponent: AsMut<IntervalProperty<Self::Property>> + C
     fn update(new_value: <Self::Property as VariableProperty>::Output, target: &mut Self::TargetComponent);
 }
 
+#[derive(Component, Reflect, FromReflect)]
+#[reflect(Component)]
+pub struct PauseIntervalProperty<T>(std::marker::PhantomData<T>);
+
+impl<T> Default for PauseIntervalProperty<T> {
+    fn default() -> Self {
+        Self(Default::default())
+    }
+}
+
 /// Creates a system that will tick the IntervalProperty field and update the component with the
 /// given updater method. 
 ///
@@ -63,11 +72,15 @@ pub trait IntervalPropertyComponent: AsMut<IntervalProperty<Self::Property>> + C
 /// AsMut<IntervalProperty> then use this to create the system that will tick that
 /// [InternvalProperty] and update the given component when the [IntervalProperty] generates a new
 /// value.
-pub fn interval_property_tick<T: IntervalPropertyComponent>(mut query: Query<(&mut T, &mut T::TargetComponent)>, time: Res<Time>) {
+pub fn interval_property_tick<T: IntervalPropertyComponent>(
+    mut query: Query<(&mut T, &mut T::TargetComponent, Option<&PauseIntervalProperty<T>>)>, time: Res<Time>
+) {
     let delta = time.delta();
-    for (mut source, mut target) in query.iter_mut() {
+    for (mut source, mut target, maybe_pause) in query.iter_mut() {
         if let Some(new_value) = AsMut::<IntervalProperty<T::Property>>::as_mut(&mut *source).tick_value(delta) {
-            T::update(new_value, target.as_mut()); 
+            if maybe_pause.is_none() {
+                T::update(new_value, target.as_mut()); 
+            }
        }
     }
 }
