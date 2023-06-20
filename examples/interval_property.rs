@@ -30,7 +30,7 @@ fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
         .add_startup_system(setup)
-        .add_system(update_interval_property_system_gen::<MyIntervalProperty>)
+        .add_system(interval_property_tick::<MyIntervalProperty>)
         .run();
 }
 

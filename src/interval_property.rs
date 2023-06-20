@@ -63,7 +63,7 @@ pub trait IntervalPropertyComponent: AsMut<IntervalProperty<Self::Property>> + C
 /// AsMut<IntervalProperty> then use this to create the system that will tick that
 /// [InternvalProperty] and update the given component when the [IntervalProperty] generates a new
 /// value.
-pub fn update_interval_property_system_gen<T: IntervalPropertyComponent>(mut query: Query<(&mut T, &mut T::TargetComponent)>, time: Res<Time>) {
+pub fn interval_property_tick<T: IntervalPropertyComponent>(mut query: Query<(&mut T, &mut T::TargetComponent)>, time: Res<Time>) {
     let delta = time.delta();
     for (mut source, mut target) in query.iter_mut() {
         if let Some(new_value) = AsMut::<IntervalProperty<T::Property>>::as_mut(&mut *source).tick_value(delta) {
