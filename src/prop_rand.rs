@@ -1,4 +1,4 @@
-use bevy::math::*;
+use bevy_math::*;
 
 use array_macro::array;
 

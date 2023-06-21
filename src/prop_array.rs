@@ -1,4 +1,4 @@
-use bevy::{math::*, prelude::*};
+use bevy_math::*;
 
 /// Wrapper around generic-length array for foreign trait implementations
 #[derive(Clone, Debug, Reflect, FromReflect)]

@@ -4,11 +4,8 @@ pub mod prop_rand;
 pub mod prop_range;
 pub mod variable_property;
 
-use bevy::{
-    math::{DVec2, DVec3, DVec4},
-    prelude::*,
-};
-
+use bevy_math::*;
+use bevy_reflect::{Reflect, FromReflect};
 use rand::{seq::SliceRandom, thread_rng};
 
 use std::ops::{Range, RangeInclusive};

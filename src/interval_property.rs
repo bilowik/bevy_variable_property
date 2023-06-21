@@ -1,4 +1,10 @@
-use bevy::{prelude::*, utils::Duration};
+use bevy_utils::Duration;
+use bevy_ecs::{
+    reflect::ReflectComponent,
+    prelude::*,
+};
+use bevy_time::{Time, Timer, TimerMode};
+use bevy_reflect::{Reflect, FromReflect};
 
 use crate::variable_property::VariableProperty;
 
@@ -65,7 +71,7 @@ impl<T: VariableProperty + Default> Default for IntervalProperty<T> {
         Self {
             property: Default::default(),
             timer: Timer::new(
-                bevy::utils::Duration::from_secs_f32(1.0),
+                Duration::from_secs_f32(1.0),
                 TimerMode::Repeating,
             ),
             curr: None,
