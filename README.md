@@ -11,9 +11,9 @@ use bevy::prelude::*;
 use bevy_variable_property::prelude::*;
 
 fn main() {
-    let p1: Property<_> = Vec2::new(0.0, 1.0).into();
-    let p2: Property<_> = (Vec2::new(0.0, -100.0)..=Vec2::new(100.0, 0.0)).into();
-    let p3: Property<_> = Property::Random;
+    let p1 = Property::Static(Vec2::new(0.0, 1.0));
+    let p2 = Property::RandomRange((Vec2::new(0.0, -100.0)..=Vec2::new(100.0, 0.0)).into());
+    let p3 = Property::Random;
 
     for _ in 0..10 {
         for p in [&p1, &p2, &p3] {
