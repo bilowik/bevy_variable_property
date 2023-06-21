@@ -5,7 +5,6 @@ use array_macro::array;
 use rand::{
     Rng, 
     RngCore,
-    distributions::{Standard, Distribution},
 };
 
 use crate::prop_range::PropRange;
