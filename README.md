@@ -83,11 +83,11 @@ impl IntervalPropertyComponent for MyIntervalProperty {
 }
 
 fn main() {
-    /*App::new()
+    App::new()
         .add_plugins(DefaultPlugins)
         .add_startup_system(setup)
         .add_system(MyIntervalProperty::system)
-        .run();*/
+        .run();
 }
 
 fn setup(
