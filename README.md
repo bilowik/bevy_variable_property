@@ -26,7 +26,7 @@ fn main() {
 
 
 ### IntervalProperty
-```no_run
+```rust, no_run
 use bevy::prelude::*;
 use bevy_variable_property::prelude::*;
 
@@ -34,11 +34,11 @@ use bevy_variable_property::prelude::*;
 struct MyComponent(pub IntervalProperty<Property<f32>>);
 
 fn main() {
-    /*App::new()
+    App::new()
         .add_plugins(DefaultPlugins)
         .add_startup_system(setup)
         .add_system(tick)
-        .run();*/
+        .run();
 }
 
 fn setup(mut commands: Commands) {
@@ -60,7 +60,7 @@ fn tick(mut query: Query<&mut MyComponent>, time: Res<Time>) {
 ```
 
 ### IntervalPropertyComponent
-```rust
+```rust, no_run
 use bevy::{prelude::*, sprite::MaterialMesh2dBundle};
 use bevy_variable_property::{interval_property::*, prelude::*};
 
