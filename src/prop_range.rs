@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use std::ops::{Range, RangeInclusive};
 
-/// Wrapper around Range<T>
+/// Wrapper around Range<T> to be utilized by PropRand. 
 #[derive(Clone, Default, Debug, Reflect, FromReflect)]
 pub struct PropRange<T> {
     pub start: T,

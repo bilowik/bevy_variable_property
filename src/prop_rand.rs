@@ -9,6 +9,12 @@ use rand::{
 
 use crate::prop_range::PropRange;
 
+
+/// Rand trait to allow defining of random generation for foreign types.
+///
+/// Required mostly due to not being able to generate from a tuple range 
+/// ie: (u8, u8)..=(u8, u8), which would also mean not being able to 
+/// utilize tuples at all for [crate::Property]
 pub trait PropRand {
     fn gen<R: RngCore + ?Sized>(rng: &mut R) -> Self;
     fn gen_range<R: RngCore + ?Sized>(rng: &mut R, range: PropRange<Self>) -> Self

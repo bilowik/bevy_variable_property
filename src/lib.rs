@@ -1,7 +1,7 @@
 //! A utility field that can produce a static or random value based on specified parameters that
 //! can be utilized in bevy components.
 
-mod prop_rand;
+pub mod prop_rand;
 pub mod prop_range;
 pub mod variable_property;
 pub mod interval_property;
@@ -66,12 +66,12 @@ impl<T: Default> Default for Property<T> {
     }
 }
 
-/// Implements a variety of From implementations for the given type.
+/// Implements a variety of From implementations for the given type. 
 ///
 /// From<$type> -> Static, From<Range<$type>> -> RandomRange, From<RangeInclusve<$type>> -> RandomRange,
 /// From<Vec<$type>> -> RandomChoice, and From<&[$type]> -> RandomChoice,
 ///
-/// The $from_type **must** implement Clone.
+/// The $from_type **must** implement Clone and PropRand to be able to utilize [Property::get_value].
 ///
 /// If two types are provided, $from_type must implement Into for $into_prop_type
 macro_rules! prop_from_impl {
@@ -131,7 +131,7 @@ macro_rules! prop_from_impl {
 /// From<$type> -> Static, From<Range<$type>> -> RandomRange, From<RangeInclusve<$type>> -> RandomRange,
 /// From<Vec<$type>> -> RandomChoice, and From<&[$type]> -> RandomChoice,
 ///
-/// The given type **must** implement Clone.
+/// The $from_type **must** implement Clone and PropRand to be able to utilize [Property::get_value].
 macro_rules! prop_from_impl_many {
     ($($type:tt,)+) => {
         $(
