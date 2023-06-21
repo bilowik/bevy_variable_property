@@ -77,6 +77,9 @@ impl<T: VariableProperty + Default> Default for IntervalProperty<T> {
     }
 }
 
+/// A convenience trait for automatically ticking the timer of an [IntervalProperty] and updating 
+/// some other Component when new values are generated. To be utilized directly as a bevy_ecs
+/// System.
 pub trait IntervalPropertyComponent: AsMut<IntervalProperty<Self::Property>> + Component + Sized {
     type Property: VariableProperty;
     type TargetComponent: Component;
