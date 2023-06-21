@@ -43,7 +43,7 @@ impl<T: VariableProperty> IntervalProperty<T> {
         }
     }
 
-    /// Explicitly set a starting value, which will be returned from [get_curr_value] until
+    /// Explicitly set a starting value, which will be returned from [IntervalProperty::get_curr_value] until
     /// the internal timer finishes the first time. 
     pub fn new_with_initial_value(property: T, interval: f32, init: T::Output) -> Self {
         Self {
@@ -54,7 +54,7 @@ impl<T: VariableProperty> IntervalProperty<T> {
     }
 
     /// Explicitly set a starting value generated from the given Property, which will be returned from 
-    /// [get_curr_value] until the internal timer finishes the first time.
+    /// [IntervalProperty::get_curr_value] until the internal timer finishes the first time.
     pub fn new_with_generated_inital_value(property: T, interval: f32) -> Self {
         let curr = Some(property.get_value());
         Self {
@@ -100,11 +100,14 @@ pub trait IntervalPropertyComponent: AsMut<IntervalProperty<Self::Property>> + C
     }
 }
 
+/// Marker component to pause the generation of new values from an IntervalPropertyComponent
+/// The timer will still tick and turn over, but [IntervalPropertyComponent::update] will not be
+/// called.
 #[derive(Component, Reflect, FromReflect)]
 #[reflect(Component)]
-pub struct PauseIntervalProperty<T>(std::marker::PhantomData<T>);
+pub struct PauseIntervalProperty<T: IntervalPropertyComponent>(std::marker::PhantomData<T>);
 
-impl<T> Default for PauseIntervalProperty<T> {
+impl<T: IntervalPropertyComponent> Default for PauseIntervalProperty<T> {
     fn default() -> Self {
         Self(Default::default())
     }
