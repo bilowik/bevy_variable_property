@@ -1,6 +1,4 @@
-//! A utility field that can produce a static or random value based on specified parameters that
-//! can be utilized in bevy components.
-
+#![doc = include_str!("../README.md")]
 pub mod interval_property;
 pub mod prop_rand;
 pub mod prop_range;
