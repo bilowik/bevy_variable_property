@@ -20,7 +20,7 @@ impl IntervalPropertyComponent for MyIntervalProperty {
     type Property = Property<Vec2>;
     type TargetComponent = Transform;
 
-    fn update(new_value: Vec2, target: &mut Transform) {
+    fn update(new_value: &Vec2, target: &mut Transform) {
         target.translation = new_value.extend(target.translation.z);
     }
 }
