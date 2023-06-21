@@ -1,10 +1,10 @@
 //! A utility field that can produce a static or random value based on specified parameters that
 //! can be utilized in bevy components.
 
+pub mod interval_property;
 pub mod prop_rand;
 pub mod prop_range;
 pub mod variable_property;
-pub mod interval_property;
 
 use bevy::{
     math::{DVec2, DVec3, DVec4},
@@ -19,7 +19,6 @@ use crate::prop_rand::PropRand;
 use crate::prop_range::PropRange;
 
 use crate::variable_property::VariableProperty;
-
 
 /// Generic property that can be static, randomized within a range, randomly selected from a
 /// predetermined list, or entirely random on each read.
@@ -66,7 +65,7 @@ impl<T: Default> Default for Property<T> {
     }
 }
 
-/// Implements a variety of From implementations for the given type. 
+/// Implements a variety of From implementations for the given type.
 ///
 /// From<$type> -> Static, From<Range<$type>> -> RandomRange, From<RangeInclusve<$type>> -> RandomRange,
 /// From<Vec<$type>> -> RandomChoice, and From<&[$type]> -> RandomChoice,
@@ -184,7 +183,10 @@ impl<T, const N: usize, const M: usize> From<[[T; N]; M]> for Property<[T; N]> {
 }
 
 pub mod prelude {
-    pub use crate::{prop_range::PropRange, variable_property::VariableProperty, Property, interval_property::IntervalProperty};
+    pub use crate::{
+        interval_property::IntervalProperty, prop_range::PropRange,
+        variable_property::VariableProperty, Property,
+    };
 }
 
 #[cfg(test)]

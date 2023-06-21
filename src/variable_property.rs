@@ -12,8 +12,6 @@ impl<T, U: VariableProperty<Output = T>, const N: usize> VariableProperty for [U
     fn get_value(&self) -> [T; N] {
         array![i => self[i].get_value(); N]
     }
-
-
 }
 macro_rules! reverse_types_output {
     () => {};
@@ -51,11 +49,10 @@ macro_rules! reverse_types {
     };
 }
 
-
 macro_rules! variable_property_impls {
     () => {};
     ($head_idx:literal $head_type:tt, $($idx:literal $type:tt,)*) => {
-    
+
         impl<$head_type: VariableProperty,$($type: VariableProperty,)*> VariableProperty for reverse_types!([], $head_type, $($type,)*) {
             type Output = reverse_types_output!([], $head_type, $($type,)*);
             fn get_value(&self) -> Self::Output {

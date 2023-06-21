@@ -1,7 +1,4 @@
-use bevy::{
-    prelude::*,
-    utils::Duration,
-};
+use bevy::{prelude::*, utils::Duration};
 
 use crate::variable_property::VariableProperty;
 
@@ -21,12 +18,11 @@ impl<T: VariableProperty> IntervalProperty<T> {
         if self.timer.just_finished() {
             self.curr = Some(self.property.get_value());
             self.get_curr_value()
-        }
-        else {
+        } else {
             None
         }
     }
-    
+
     /// Returns a reference to the current value if one has been set yet.
     pub fn get_curr_value(&self) -> Option<&T::Output> {
         self.curr.as_ref()
@@ -34,7 +30,6 @@ impl<T: VariableProperty> IntervalProperty<T> {
 }
 
 impl<T: VariableProperty> IntervalProperty<T> {
-
     pub fn new(property: T, interval: f32) -> Self {
         Self {
             property,
@@ -44,7 +39,7 @@ impl<T: VariableProperty> IntervalProperty<T> {
     }
 
     /// Explicitly set a starting value, which will be returned from [IntervalProperty::get_curr_value] until
-    /// the internal timer finishes the first time. 
+    /// the internal timer finishes the first time.
     pub fn new_with_initial_value(property: T, interval: f32, init: T::Output) -> Self {
         Self {
             property,
@@ -53,52 +48,64 @@ impl<T: VariableProperty> IntervalProperty<T> {
         }
     }
 
-    /// Explicitly set a starting value generated from the given Property, which will be returned from 
+    /// Explicitly set a starting value generated from the given Property, which will be returned from
     /// [IntervalProperty::get_curr_value] until the internal timer finishes the first time.
     pub fn new_with_generated_inital_value(property: T, interval: f32) -> Self {
         let curr = Some(property.get_value());
         Self {
             property,
             timer: Timer::from_seconds(interval, TimerMode::Repeating),
-            curr
+            curr,
         }
-
     }
 }
-
 
 impl<T: VariableProperty + Default> Default for IntervalProperty<T> {
     fn default() -> Self {
         Self {
             property: Default::default(),
-            timer: Timer::new(bevy::utils::Duration::from_secs_f32(1.0), TimerMode::Repeating),
-            curr: None
+            timer: Timer::new(
+                bevy::utils::Duration::from_secs_f32(1.0),
+                TimerMode::Repeating,
+            ),
+            curr: None,
         }
     }
 }
 
-/// A convenience trait for automatically ticking the timer of an [IntervalProperty] and updating 
+/// A convenience trait for automatically ticking the timer of an [IntervalProperty] and updating
 /// some other Component when new values are generated. To be utilized directly as a bevy_ecs
 /// System.
-pub trait IntervalPropertyComponent: AsMut<IntervalProperty<Self::Property>> + Component + Sized {
+pub trait IntervalPropertyComponent:
+    AsMut<IntervalProperty<Self::Property>> + Component + Sized
+{
     type Property: VariableProperty;
     type TargetComponent: Component;
 
-    fn update(new_value: &<Self::Property as VariableProperty>::Output, target: &mut Self::TargetComponent);
+    fn update(
+        new_value: &<Self::Property as VariableProperty>::Output,
+        target: &mut Self::TargetComponent,
+    );
 
     /// The system that will tick the given component's IntervalProperty and run the defined update
     /// function when a new value is generated.
     fn system(
-        mut query: Query<(&mut Self, &mut Self::TargetComponent, Option<&PauseIntervalProperty<Self>>)>, 
+        mut query: Query<(
+            &mut Self,
+            &mut Self::TargetComponent,
+            Option<&PauseIntervalProperty<Self>>,
+        )>,
         time: Res<Time>,
     ) {
         let delta = time.delta();
         for (mut source, mut target, maybe_pause) in query.iter_mut() {
-            if let Some(new_value) = AsMut::<IntervalProperty<Self::Property>>::as_mut(&mut *source).tick_value(delta) {
+            if let Some(new_value) =
+                AsMut::<IntervalProperty<Self::Property>>::as_mut(&mut *source).tick_value(delta)
+            {
                 if maybe_pause.is_none() {
-                    Self::update(new_value, target.as_mut()); 
+                    Self::update(new_value, target.as_mut());
                 }
-           }
+            }
         }
     }
 }

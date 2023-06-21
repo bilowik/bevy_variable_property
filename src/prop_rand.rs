@@ -2,18 +2,14 @@ use bevy::math::*;
 
 use array_macro::array;
 
-use rand::{
-    Rng, 
-    RngCore,
-};
+use rand::{Rng, RngCore};
 
 use crate::prop_range::PropRange;
 
-
 /// Rand trait to allow defining of random generation for foreign types.
 ///
-/// Required mostly due to not being able to generate from a tuple range 
-/// ie: (u8, u8)..=(u8, u8), which would also mean not being able to 
+/// Required mostly due to not being able to generate from a tuple range
+/// ie: (u8, u8)..=(u8, u8), which would also mean not being able to
 /// utilize tuples at all for [crate::Property]
 pub trait PropRand {
     fn gen<R: RngCore + ?Sized>(rng: &mut R) -> Self;
@@ -52,7 +48,7 @@ prop_rand_impl_many!(usize, isize, u8, u16, u32, u64, u128, i8, i16, i32, i64, i
 
 impl<T, const N: usize> PropRand for [T; N]
 where
-    T: PropRand + Clone
+    T: PropRand + Clone,
 {
     fn gen<R: RngCore + ?Sized>(rng: &mut R) -> Self {
         array![_ => T::gen(rng); N].into()
@@ -141,11 +137,15 @@ macro_rules! prop_rand_vec_impl {
             }
 
             fn gen_range<R: RngCore + ?Sized>(rng: &mut R, range: PropRange<Self>) -> Self {
-                <[$inner_type; $size]>::gen_range(rng, PropRange {
-                    start: range.start.into(),
-                    end: range.end.into(),
-                    inclusive: range.inclusive
-                }).into()
+                <[$inner_type; $size]>::gen_range(
+                    rng,
+                    PropRange {
+                        start: range.start.into(),
+                        end: range.end.into(),
+                        inclusive: range.inclusive,
+                    },
+                )
+                .into()
             }
         }
     };
