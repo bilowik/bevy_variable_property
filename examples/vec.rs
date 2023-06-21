@@ -13,8 +13,7 @@ fn main() {
             ("Random range", &p2),
             ("Entirely random", &p3),
         ] {
-            let v: Vec2 = p.get_value().into();
-            println!("{}: {:?}", desc, v);
+            println!("{}: {:?}", desc, p.get_value());
         }
     }
 }
