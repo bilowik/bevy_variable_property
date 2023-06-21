@@ -7,6 +7,7 @@ keywords = ["gamedev", "bevy"]
 categories = ["game-development"]
 authors = ["bilowik"]
 description = "A generic way to define properties as static, random, or randomized on an interval"
+repository = "https://github.com/bilowik/bevy_variable_property"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
