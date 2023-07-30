@@ -1,7 +1,7 @@
 use bevy_math::*;
 
 /// Wrapper around generic-length array for foreign trait implementations
-#[derive(Clone, Debug, Reflect, FromReflect)]
+#[derive(Clone, Debug, Reflect)]
 pub struct PropArray<T, const N: usize>(pub [T; N]);
 
 impl<T: Default + Copy, const N: usize> Default for PropArray<T, N> {

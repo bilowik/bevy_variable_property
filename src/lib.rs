@@ -5,7 +5,7 @@ pub mod prop_range;
 pub mod variable_property;
 
 use bevy_math::*;
-use bevy_reflect::{Reflect, FromReflect};
+use bevy_reflect::Reflect;
 use rand::{seq::SliceRandom, thread_rng};
 
 use std::ops::{Range, RangeInclusive};
@@ -19,7 +19,7 @@ use crate::variable_property::VariableProperty;
 /// predetermined list, or entirely random on each read.
 ///
 /// Implementation of Default provides `Static(T::default())`
-#[derive(Reflect, FromReflect, Clone)]
+#[derive(Reflect, Clone)]
 pub enum Property<T> {
     /// Produces the same value
     Static(T),

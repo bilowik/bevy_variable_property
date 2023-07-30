@@ -1,10 +1,10 @@
 use bevy_math::*;
-use bevy_reflect::{Reflect, FromReflect};
+use bevy_reflect::Reflect;
 
 use std::ops::{Range, RangeInclusive};
 
 /// Wrapper around [std::ops::Range] to be utilized by PropRand.
-#[derive(Clone, Default, Debug, Reflect, FromReflect)]
+#[derive(Clone, Default, Debug, Reflect)]
 pub struct PropRange<T> {
     pub start: T,
     pub end: T,

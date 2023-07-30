@@ -4,12 +4,12 @@ use bevy_ecs::{
     prelude::*,
 };
 use bevy_time::{Time, Timer, TimerMode};
-use bevy_reflect::{Reflect, FromReflect};
+use bevy_reflect::Reflect;
 
 use crate::variable_property::VariableProperty;
 
 /// A field that generates a new value on an interval.
-#[derive(Reflect, FromReflect)]
+#[derive(Reflect)]
 pub struct IntervalProperty<T: VariableProperty> {
     property: T,
     timer: Timer,
@@ -119,7 +119,7 @@ pub trait IntervalPropertyComponent:
 /// Marker component to pause the generation of new values from an IntervalPropertyComponent
 /// The timer will still tick and turn over, but [IntervalPropertyComponent::update] will not be
 /// called.
-#[derive(Component, Reflect, FromReflect)]
+#[derive(Component, Reflect)]
 #[reflect(Component)]
 pub struct PauseIntervalProperty<T: IntervalPropertyComponent>(std::marker::PhantomData<T>);
 
