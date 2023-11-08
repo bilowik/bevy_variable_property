@@ -4,19 +4,19 @@ use bevy_ecs::{
     prelude::*,
 };
 use bevy_time::{Time, Timer, TimerMode};
-use bevy_reflect::Reflect;
+use bevy_reflect::{Reflect, TypePath};
 
 use crate::variable_property::VariableProperty;
 
 /// A field that generates a new value on an interval.
 #[derive(Reflect)]
-pub struct IntervalProperty<T: VariableProperty> {
+pub struct IntervalProperty<T: VariableProperty + TypePath> {
     property: T,
     timer: Timer,
     curr: Option<T::Output>,
 }
 
-impl<T: VariableProperty> IntervalProperty<T> {
+impl<T: VariableProperty + TypePath> IntervalProperty<T> {
     /// Ticks the internal timer by the given delta and will generate a new value if the timer
     /// has finished and return a reference to it.
     pub fn tick_value(&mut self, delta: Duration) -> Option<&T::Output> {
@@ -35,7 +35,7 @@ impl<T: VariableProperty> IntervalProperty<T> {
     }
 }
 
-impl<T: VariableProperty> IntervalProperty<T> {
+impl<T: VariableProperty + TypePath> IntervalProperty<T> {
     pub fn new(property: T, interval: f32) -> Self {
         Self {
             property,
@@ -66,7 +66,7 @@ impl<T: VariableProperty> IntervalProperty<T> {
     }
 }
 
-impl<T: VariableProperty + Default> Default for IntervalProperty<T> {
+impl<T: VariableProperty + Default + TypePath> Default for IntervalProperty<T> {
     fn default() -> Self {
         Self {
             property: Default::default(),
@@ -85,7 +85,7 @@ impl<T: VariableProperty + Default> Default for IntervalProperty<T> {
 pub trait IntervalPropertyComponent:
     AsMut<IntervalProperty<Self::Property>> + Component + Sized
 {
-    type Property: VariableProperty;
+    type Property: VariableProperty + TypePath;
     type TargetComponent: Component;
 
     fn update(
@@ -116,15 +116,34 @@ pub trait IntervalPropertyComponent:
     }
 }
 
+#[derive(Default)]
+struct PhantomDataWrapper<T: IntervalPropertyComponent>(std::marker::PhantomData<T>);
+
+impl<T: IntervalPropertyComponent> PhantomDataWrapper<T> {
+    pub fn new() -> Self {
+        Self(std::marker::PhantomData)
+    }
+}
+
+impl<T: IntervalPropertyComponent> TypePath for PhantomDataWrapper<T> {
+    fn type_path() -> &'static str {
+        "bevy_variable_property::PhantomDataWrapper"
+    }
+
+    fn short_type_path() -> &'static str {
+        "PhantomDataWrapper"        
+    }
+}
+
 /// Marker component to pause the generation of new values from an IntervalPropertyComponent
 /// The timer will still tick and turn over, but [IntervalPropertyComponent::update] will not be
 /// called.
 #[derive(Component, Reflect)]
 #[reflect(Component)]
-pub struct PauseIntervalProperty<T: IntervalPropertyComponent>(std::marker::PhantomData<T>);
+pub struct PauseIntervalProperty<T: IntervalPropertyComponent>(PhantomDataWrapper<T>);
 
 impl<T: IntervalPropertyComponent> Default for PauseIntervalProperty<T> {
     fn default() -> Self {
-        Self(Default::default())
+        Self(PhantomDataWrapper::<T>::new())
     }
 }

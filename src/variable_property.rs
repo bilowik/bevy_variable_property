@@ -1,18 +1,20 @@
 use array_macro::array;
 use paste::paste;
+use bevy_reflect::TypePath;
 
 pub trait VariableProperty {
-    type Output;
+    type Output: TypePath;
     fn get_value(&self) -> Self::Output;
 }
 
-impl<T, U: VariableProperty<Output = T>, const N: usize> VariableProperty for [U; N] {
+impl<T: TypePath, U: VariableProperty<Output = T>, const N: usize> VariableProperty for [U; N] {
     type Output = [T; N];
 
     fn get_value(&self) -> [T; N] {
         array![i => self[i].get_value(); N]
     }
 }
+
 macro_rules! reverse_types_output {
     () => {};
     ([$($list:tt,)*], $head:tt, $($tail:tt,)*) => {
@@ -65,4 +67,4 @@ macro_rules! variable_property_impls {
     };
 }
 
-variable_property_impls!(15 P, 14 O,  13 N,  12 M,  11 L,  10 K,  9 J, 8 I, 7 H, 6 G, 5 F, 4 E, 3 D, 2 C, 1 B, 0 A,);
+variable_property_impls!(11 L,  10 K,  9 J, 8 I, 7 H, 6 G, 5 F, 4 E, 3 D, 2 C, 1 B, 0 A,);

@@ -5,7 +5,7 @@ pub mod prop_range;
 pub mod variable_property;
 
 use bevy_math::*;
-use bevy_reflect::Reflect;
+use bevy_reflect::{Reflect, TypePath};
 use rand::{seq::SliceRandom, thread_rng};
 
 use std::ops::{Range, RangeInclusive};
@@ -36,7 +36,7 @@ pub enum Property<T> {
 
 impl<T> VariableProperty for Property<T>
 where
-    T: PropRand + Clone,
+    T: PropRand + Clone + TypePath,
 {
     type Output = T;
     /// Gets a value based on the parameters of the Property

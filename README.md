@@ -36,8 +36,8 @@ struct MyComponent(pub IntervalProperty<Property<f32>>);
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
-        .add_startup_system(setup)
-        .add_system(tick)
+        .add_systems(Startup, setup)
+        .add_systems(Update, tick)
         .run();
 }
 
@@ -85,8 +85,8 @@ impl IntervalPropertyComponent for MyIntervalProperty {
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
-        .add_startup_system(setup)
-        .add_system(MyIntervalProperty::system)
+        .add_systems(Startup, setup)
+        .add_systems(Update, MyIntervalProperty::system)
         .run();
 }
 
