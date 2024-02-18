@@ -29,7 +29,7 @@ fn main() {
         println!("{}", description);
         println!("===============================");
         for _ in 0..5 {
-            let color: Color = p.get_value().into();
+            let color = Color::rgba_from_array(p.get_value());
             println!("{:?}", color);
         }
         println!("===============================\n");
