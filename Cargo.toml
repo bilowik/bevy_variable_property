@@ -1,6 +1,6 @@
 [package]
 name = "bevy_variable_property"
-version = "0.1.0-pre.5"
+version = "0.1.0"
 edition = "2021"
 license = "Unlicense"
 keywords = ["gamedev", "bevy"]
@@ -13,16 +13,16 @@ repository = "https://github.com/bilowik/bevy_variable_property"
 
 [dependencies]
 rand = "0.8.5"
-bevy_ecs = "0.13.0"
-bevy_math = "0.13.0"
-bevy_reflect = "0.13.0"
-bevy_utils = "0.13.0"
-bevy_time = "0.13.0"
+bevy_ecs = "0.14.0"
+bevy_math = "0.14.0"
+bevy_reflect = "0.14.0"
+bevy_utils = "0.14.0"
+bevy_time = "0.14.0"
 array-macro = "^2.1.5"
 paste = "1.0.12"
 
 
 [dev-dependencies]
-bevy = "0.13.0"
+bevy = "0.14.0"
 
 

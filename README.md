@@ -99,7 +99,7 @@ fn setup(
     commands.spawn((
         MaterialMesh2dBundle {
             mesh: meshes
-                .add(Mesh::from(shape::Quad::new(Vec2::new(128.0, 128.0))))
+                .add(Mesh::from(Rectangle::new(128.0, 128.0)))
                 .into(),
             material: materials.add(ColorMaterial::from(Color::WHITE)),
             ..default()
