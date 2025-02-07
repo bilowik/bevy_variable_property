@@ -1,4 +1,4 @@
-use bevy::{prelude::*, sprite::MaterialMesh2dBundle};
+use bevy::prelude::*;
 use bevy_variable_property::{interval_property::*, prelude::*};
 
 #[derive(Component)]
@@ -32,15 +32,10 @@ fn setup(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
-    commands.spawn(Camera2dBundle::default());
+    commands.spawn(Camera2d::default());
     commands.spawn((
-        MaterialMesh2dBundle {
-            mesh: meshes
-                .add(Mesh::from(Rectangle::new(128.0, 128.0)))
-                .into(),
-            material: materials.add(ColorMaterial::from(Color::WHITE)),
-            ..default()
-        },
+        Mesh2d(meshes.add(Mesh::from(Rectangle::new(128.0, 128.0)))),
+        MeshMaterial2d(materials.add(ColorMaterial::from(Color::WHITE))),
         MyIntervalProperty(IntervalProperty::new(
             (Vec2::new(-250.0, -250.0)..=Vec2::new(250.0, 250.0)).into(),
             0.5,
