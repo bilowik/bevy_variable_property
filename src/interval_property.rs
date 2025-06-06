@@ -1,10 +1,7 @@
-use bevy_utils::Duration;
-use bevy_ecs::{
-    reflect::ReflectComponent,
-    prelude::*,
-};
-use bevy_time::{Time, Timer, TimerMode};
+use bevy_ecs::{component::Mutable, prelude::*, reflect::ReflectComponent};
 use bevy_reflect::{Reflect, TypePath};
+use bevy_time::{Time, Timer, TimerMode};
+use core::time::Duration;
 
 use crate::variable_property::VariableProperty;
 
@@ -70,10 +67,7 @@ impl<T: VariableProperty + Default + TypePath> Default for IntervalProperty<T> {
     fn default() -> Self {
         Self {
             property: Default::default(),
-            timer: Timer::new(
-                Duration::from_secs_f32(1.0),
-                TimerMode::Repeating,
-            ),
+            timer: Timer::new(Duration::from_secs_f32(1.0), TimerMode::Repeating),
             curr: None,
         }
     }
@@ -83,10 +77,10 @@ impl<T: VariableProperty + Default + TypePath> Default for IntervalProperty<T> {
 /// some other Component when new values are generated. To be utilized directly as a bevy_ecs
 /// System.
 pub trait IntervalPropertyComponent:
-    AsMut<IntervalProperty<Self::Property>> + Component + Sized
+    AsMut<IntervalProperty<Self::Property>> + Component<Mutability = Mutable> + Sized
 {
     type Property: VariableProperty + TypePath;
-    type TargetComponent: Component;
+    type TargetComponent: Component<Mutability = Mutable>;
 
     fn update(
         new_value: &<Self::Property as VariableProperty>::Output,
@@ -131,7 +125,7 @@ impl<T: IntervalPropertyComponent> TypePath for PhantomDataWrapper<T> {
     }
 
     fn short_type_path() -> &'static str {
-        "PhantomDataWrapper"        
+        "PhantomDataWrapper"
     }
 }
 

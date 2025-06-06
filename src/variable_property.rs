@@ -1,6 +1,6 @@
 use array_macro::array;
-use paste::paste;
 use bevy_reflect::TypePath;
+use paste::paste;
 
 pub trait VariableProperty {
     type Output: TypePath;
